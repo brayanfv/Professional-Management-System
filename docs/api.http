@@ -1,0 +1,104 @@
+@baseUrl = http://localhost:8080/api
+@accessToken = replace-with-login-token
+
+### Login (the bootstrap admin must be configured through environment variables)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "replace-with-password"
+}
+
+### Current authenticated user
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Stateless logout (the client discards the token)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### Dashboard summary
+GET {{baseUrl}}/dashboard/summary
+Authorization: Bearer {{accessToken}}
+
+### Professionals by department
+GET {{baseUrl}}/dashboard/professionals-by-department
+Authorization: Bearer {{accessToken}}
+
+### Professionals by position
+GET {{baseUrl}}/dashboard/professionals-by-position
+Authorization: Bearer {{accessToken}}
+
+### Recent professionals
+GET {{baseUrl}}/dashboard/recent-professionals?limit=5
+Authorization: Bearer {{accessToken}}
+
+### Create department
+POST {{baseUrl}}/departments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Technology",
+  "description": "Technology department"
+}
+
+### Create position
+POST {{baseUrl}}/positions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Software Developer",
+  "description": "Responsible for software development"
+}
+
+### Create professional
+POST {{baseUrl}}/professionals
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Brayan Favarin",
+  "birthDate": "2004-11-17",
+  "departmentId": 1,
+  "positionId": 1
+}
+
+### List professionals with filters
+GET {{baseUrl}}/professionals?page=0&size=10&search=Brayan&status=ACTIVE&departmentId=1&sort=name,asc
+Authorization: Bearer {{accessToken}}
+
+### Update professional status
+PATCH {{baseUrl}}/professionals/1/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{ "status": "INACTIVE" }
+
+### Create a contact for a professional
+POST {{baseUrl}}/professionals/1/contacts
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "EMAIL",
+  "value": "brayan@example.com",
+  "label": "Professional"
+}
+
+### List a professional's contacts
+GET {{baseUrl}}/professionals/1/contacts
+Authorization: Bearer {{accessToken}}
+
+### Update a contact
+PUT {{baseUrl}}/professionals/1/contacts/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "MOBILE",
+  "value": "+55 48 99999-9999",
+  "label": "Personal"
+}
