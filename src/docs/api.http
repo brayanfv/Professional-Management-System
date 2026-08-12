@@ -1,0 +1,59 @@
+###
+POST http://localhost:8080/profissionais
+Content-Type: application/json
+
+{
+    "nome": "Teste Dev",
+    "contatos": [
+        {
+        "telefone": "99999-1111",
+        "email": "teste@dev.com"
+        },
+        {
+        "telefone": "99999-2222",
+        "email": "teste@dev.com"
+        }
+    ]
+}
+
+### INSERIR UM PROFISSIONAL SEM CONTATO
+POST http://localhost:8080/profissionais
+Content-Type: application/json
+
+{
+    "nome": "Bruno",
+    "cargo": "Desenvolvedor",
+    "nascimento": "1986-09-28",
+    "created_date": "2025-04-10"
+}
+
+### INSERIR UM CONTATO PASSANDO O ID DO PROFISSIONAL
+POST http://localhost:8080/contatos
+Content-Type: application/json
+
+{
+    "nome": "Brayan 123",
+    "contato": "matheus@exemplo.com",
+    "profissionalId": 3
+}
+
+
+### Listagem de todos os profissionais com seus contatos (GET /profissionais)
+GET http://localhost:8080/profissionais
+Content-Type: application/json
+
+### Listagem de contatos de um cliente específico (GET /profissionais/{id}/contatos)
+GET http://localhost:8080/profissionais/3/contatos
+Content-Type: application/json
+
+### Buscar contatos com texto "brayan"
+GET http://localhost:8080/contatos
+Content-Type: application/json
+
+### Buscar contatos com texto "brayan"
+GET http://localhost:8080/contatos?q=brayan
+Content-Type: application/json
+
+### Buscar contatos com texto "brayan", retornando somente nome e contato
+GET http://localhost:8080/contatos?q=brayan&fields=nome,contato
+Content-Type: application/json
