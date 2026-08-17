@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+
 import com.brayanfavarin.professionalmanagement.dto.dashboard.DepartmentProfessionalCountResponse;
 import com.brayanfavarin.professionalmanagement.dto.dashboard.PositionProfessionalCountResponse;
 import com.brayanfavarin.professionalmanagement.enums.ProfessionalStatus;
@@ -17,6 +20,11 @@ import com.brayanfavarin.professionalmanagement.model.Professional;
 public interface ProfessionalRepository extends JpaRepository<Professional, Long>, JpaSpecificationExecutor<Professional> {
     boolean existsByDepartmentId(Long departmentId);
     boolean existsByPositionId(Long positionId);
+
+    @Override
+    @EntityGraph(attributePaths = {"department", "position"})
+    Page<Professional> findAll(Specification<Professional> specification, Pageable pageable);
+
     @EntityGraph(attributePaths = {"department", "position", "contacts"})
     Optional<Professional> findDetailsById(Long id);
 

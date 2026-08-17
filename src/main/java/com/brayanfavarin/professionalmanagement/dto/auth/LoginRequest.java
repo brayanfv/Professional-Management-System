@@ -11,4 +11,9 @@ public record LoginRequest(
         @Schema(example = "admin@example.com") String email,
         @NotBlank(message = "Password is required") @Size(max = 255)
         @Schema(example = "password", description = "Example only; never use a production password") String password) {
+
+    @Override
+    public String toString() {
+        return "LoginRequest[email=" + email + ", password=[REDACTED]]";
+    }
 }

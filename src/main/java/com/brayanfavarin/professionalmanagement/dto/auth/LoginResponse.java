@@ -8,4 +8,10 @@ public record LoginResponse(
         @Schema(example = "Bearer") String tokenType,
         @Schema(description = "Token lifetime in seconds", example = "3600") long expiresIn,
         AuthenticatedUserResponse user) {
+
+    @Override
+    public String toString() {
+        return "LoginResponse[accessToken=[REDACTED], tokenType=" + tokenType
+                + ", expiresIn=" + expiresIn + ", user=" + user + "]";
+    }
 }

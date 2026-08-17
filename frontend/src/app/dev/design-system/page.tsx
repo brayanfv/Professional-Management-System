@@ -1,0 +1,11 @@
+import { notFound } from "next/navigation"
+
+import { DesignSystemShowcase } from "@/components/common/design-system-showcase"
+
+export default function DesignSystemPage() {
+  if (process.env.NODE_ENV !== "development") {
+    notFound()
+  }
+
+  return <DesignSystemShowcase />
+}

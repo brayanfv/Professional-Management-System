@@ -1,7 +1,5 @@
 package com.brayanfavarin.professionalmanagement.service;
 
-import java.util.Set;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
