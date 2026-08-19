@@ -5,7 +5,6 @@ import Link from "next/link"
 
 import { Pagination } from "@/components/common/pagination"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ProfessionalListSkeleton } from "@/features/professionals/components/professional-list-skeleton"
 import { ProfessionalMobileCards } from "@/features/professionals/components/professional-mobile-cards"
 import { ProfessionalsTable } from "@/features/professionals/components/professionals-table"
@@ -54,66 +53,59 @@ export function ProfessionalList({
 
   if (isError) {
     return (
-      <Card>
-        <CardContent
-          className="flex min-h-72 flex-col items-center justify-center gap-3 px-6 text-center"
-          role="alert"
-        >
-          <CircleAlertIcon
-            className="size-6 text-danger"
-            aria-hidden="true"
-          />
-          <div className="space-y-1">
-            <p className="font-semibold text-foreground">
-              Unable to load professionals
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Something went wrong while loading this data.
-            </p>
-          </div>
-          <Button variant="outline" onClick={onRetry}>
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <div
+        className="flex min-h-72 flex-col items-center justify-center gap-3 px-6 text-center"
+        role="alert"
+      >
+        <CircleAlertIcon className="size-6 text-danger" aria-hidden="true" />
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground">
+            Unable to load professionals
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Something went wrong while loading this data.
+          </p>
+        </div>
+        <Button variant="outline" onClick={onRetry}>
+          Try again
+        </Button>
+      </div>
     )
   }
 
   if (data?.totalElements === 0) {
     return (
-      <Card>
-        <CardContent className="flex min-h-72 flex-col items-center justify-center gap-4 px-6 text-center">
-          <span className="flex size-11 items-center justify-center rounded-md bg-primary-soft text-primary">
-            {hasFilters ? (
-              <UsersIcon className="size-5" aria-hidden="true" />
-            ) : (
-              <UserPlusIcon className="size-5" aria-hidden="true" />
-            )}
-          </span>
-          <div className="space-y-1">
-            <p className="font-semibold text-foreground">
-              {hasFilters ? "No professionals found" : "No professionals yet"}
-            </p>
-            <p className="max-w-md text-sm text-muted-foreground">
-              {hasFilters
-                ? "Try adjusting your search or filters."
-                : "Add your first professional to start building your organization directory."}
-            </p>
-          </div>
+      <div className="flex min-h-72 flex-col items-center justify-center gap-4 px-6 text-center">
+        <span className="flex size-11 items-center justify-center rounded-md bg-primary-soft text-primary">
           {hasFilters ? (
-            <Button variant="outline" onClick={onClearFilters}>
-              Clear filters
-            </Button>
+            <UsersIcon className="size-5" aria-hidden="true" />
           ) : (
-            <Link
-              href={getProfessionalCreateHref(returnHref)}
-              className={buttonVariants()}
-            >
-              Add professional
-            </Link>
+            <UserPlusIcon className="size-5" aria-hidden="true" />
           )}
-        </CardContent>
-      </Card>
+        </span>
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground">
+            {hasFilters ? "No professionals found" : "No professionals yet"}
+          </p>
+          <p className="max-w-md text-sm text-muted-foreground">
+            {hasFilters
+              ? "Try adjusting your search or filters."
+              : "Add your first professional to start building your organization directory."}
+          </p>
+        </div>
+        {hasFilters ? (
+          <Button variant="outline" onClick={onClearFilters}>
+            Clear filters
+          </Button>
+        ) : (
+          <Link
+            href={getProfessionalCreateHref(returnHref)}
+            className={buttonVariants()}
+          >
+            Add professional
+          </Link>
+        )}
+      </div>
     )
   }
 
@@ -122,10 +114,9 @@ export function ProfessionalList({
   }
 
   return (
-    <Card
-      className="gap-0 py-0"
+    <div
       aria-busy={isUpdating}
-      aria-label="Professionals list"
+      className="min-w-0"
     >
       {isUpdating ? (
         <div
@@ -135,7 +126,7 @@ export function ProfessionalList({
           Updating results...
         </div>
       ) : null}
-      <CardContent
+      <div
         className={cn(
           "p-0 transition-opacity duration-150",
           isUpdating && "opacity-60",
@@ -160,7 +151,7 @@ export function ProfessionalList({
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

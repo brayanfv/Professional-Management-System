@@ -1,10 +1,11 @@
-import { CircleAlertIcon, UserPlusIcon } from "lucide-react"
+import { ArrowRightIcon, CircleAlertIcon, UserPlusIcon } from "lucide-react"
 import Link from "next/link"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -30,7 +31,7 @@ function ProfessionalIdentity({
   professional: RecentProfessional
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2.5">
       <Avatar size="sm">
         <AvatarFallback>{getInitials(professional.name)}</AvatarFallback>
       </Avatar>
@@ -55,12 +56,21 @@ export function RecentProfessionals({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="gap-0 shadow-none [--card-spacing:1.25rem]">
+      <CardHeader className="pb-4">
         <CardTitle>Recent professionals</CardTitle>
         <CardDescription>
           The latest professionals added to the organization.
         </CardDescription>
+        <CardAction>
+          <Link
+            href={routes.professionals.list}
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary outline-none transition-colors hover:text-primary-hover focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary/25"
+          >
+            View all
+            <ArrowRightIcon className="size-4" aria-hidden="true" />
+          </Link>
+        </CardAction>
       </CardHeader>
       <CardContent>
         {isError ? (
@@ -113,19 +123,19 @@ export function RecentProfessionals({
                 </caption>
                 <thead>
                   <tr className="border-b border-border text-xs font-medium text-muted-foreground">
-                    <th scope="col" className="pb-3 pr-4 font-medium">
+                    <th scope="col" className="pb-2.5 pr-4 font-medium">
                       Professional
                     </th>
-                    <th scope="col" className="px-4 pb-3 font-medium">
+                    <th scope="col" className="px-4 pb-2.5 font-medium">
                       Department
                     </th>
-                    <th scope="col" className="px-4 pb-3 font-medium">
+                    <th scope="col" className="px-4 pb-2.5 font-medium">
                       Position
                     </th>
-                    <th scope="col" className="px-4 pb-3 font-medium">
+                    <th scope="col" className="px-4 pb-2.5 font-medium">
                       Status
                     </th>
-                    <th scope="col" className="pb-3 pl-4 font-medium">
+                    <th scope="col" className="pb-2.5 pl-4 font-medium">
                       Added
                     </th>
                   </tr>
@@ -136,19 +146,19 @@ export function RecentProfessionals({
                       key={professional.id}
                       className="border-b border-border last:border-0"
                     >
-                      <td className="py-4 pr-4">
+                      <td className="py-3.5 pr-4">
                         <ProfessionalIdentity professional={professional} />
                       </td>
-                      <td className="px-4 py-4 text-text-secondary">
+                      <td className="px-4 py-3.5 text-text-secondary">
                         {professional.department?.name ?? "—"}
                       </td>
-                      <td className="px-4 py-4 text-text-secondary">
+                      <td className="px-4 py-3.5 text-text-secondary">
                         {professional.position?.name ?? "—"}
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-3.5">
                         <ProfessionalStatusBadge status={professional.status} />
                       </td>
-                      <td className="py-4 pl-4 whitespace-nowrap text-muted-foreground">
+                      <td className="py-3.5 pl-4 whitespace-nowrap text-muted-foreground">
                         {formatShortDate(professional.createdAt)}
                       </td>
                     </tr>
@@ -159,7 +169,7 @@ export function RecentProfessionals({
 
             <ul className="divide-y divide-border md:hidden">
               {data.map((professional) => (
-                <li key={professional.id} className="space-y-3 py-4 first:pt-0 last:pb-0">
+                <li key={professional.id} className="space-y-3 py-3.5 first:pt-0 last:pb-0">
                   <ProfessionalIdentity professional={professional} />
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 pl-11 text-sm">
                     <div className="min-w-0">

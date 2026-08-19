@@ -280,7 +280,7 @@ export function ProfessionalForm({
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-5">
       <Link
         href={cancelHref}
         onClick={(event) => requestNavigation(event, cancelHref)}
@@ -304,7 +304,7 @@ export function ProfessionalForm({
         }
       />
 
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {formError ? (
           <div
             className="rounded-md border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger-foreground"
@@ -318,9 +318,9 @@ export function ProfessionalForm({
           title="Personal information"
           description="Basic information about the professional."
         >
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-5">
             <FormField
-              className="sm:col-span-2"
+              className="md:col-span-2"
               invalid={Boolean(errors.name)}
               disabled={isPending}
             >
@@ -367,7 +367,7 @@ export function ProfessionalForm({
           title="Organization"
           description="Define where this professional belongs."
         >
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 md:gap-5">
             <Controller
               control={control}
               name="departmentId"

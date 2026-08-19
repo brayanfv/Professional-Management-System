@@ -18,21 +18,27 @@ export function EntityHeader({
   secondaryActions,
 }: EntityHeaderProps) {
   return (
-    <header className="flex flex-col gap-5 rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex min-w-0 items-start gap-4 sm:items-center">
+    <header className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex min-w-0 items-center gap-4">
         {avatar}
-        <div className="min-w-0 space-y-1.5">
-          <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        <div className="min-w-0 space-y-1">
+          <h1 className="truncate text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             {title}
           </h1>
-          {subtitle ? (
-            <div className="text-sm text-muted-foreground">{subtitle}</div>
+          {subtitle || status ? (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              {subtitle ? (
+                <div className="min-w-0 truncate text-muted-foreground">
+                  {subtitle}
+                </div>
+              ) : null}
+              {status ? <div className="shrink-0">{status}</div> : null}
+            </div>
           ) : null}
-          {status ? <div>{status}</div> : null}
         </div>
       </div>
       {primaryAction || secondaryActions ? (
-        <div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
+        <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
           {primaryAction}
           {secondaryActions}
         </div>

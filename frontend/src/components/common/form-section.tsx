@@ -18,14 +18,16 @@ export function FormSection({
   children: ReactNode
 }) {
   return (
-    <Card>
-      <CardHeader className="border-b border-border">
+    <Card className="gap-0 py-0 shadow-none">
+      <CardHeader className="border-b border-border px-4 py-3 !pb-3 sm:px-5 sm:py-3.5 sm:!pb-3.5">
         <CardTitle>{title}</CardTitle>
         {description ? (
           <CardDescription>{description}</CardDescription>
         ) : null}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-4 py-4 sm:px-5 sm:py-5">
+        {children}
+      </CardContent>
     </Card>
   )
 }

@@ -29,7 +29,7 @@ export function ProfessionalActions({
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="size-10 rounded-md sm:size-9"
             aria-label="Open professional actions"
           />
         }

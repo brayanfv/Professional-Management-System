@@ -20,7 +20,7 @@ const config = {
   createSheetTitle: "New department",
   createSheetDescription: "Create a department for your organization.",
   editSheetTitle: "Edit department",
-  editSheetDescription: "Update this department's information.",
+  editSheetDescription: "Update this department.",
   emptyDescription: "Create your first department to organize professionals.",
   filteredEmptyDescription: "Try a different search.",
   deleteTitle: "Delete department?",

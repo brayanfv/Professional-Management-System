@@ -20,7 +20,7 @@ const config = {
   createSheetTitle: "New position",
   createSheetDescription: "Create a position for your organization.",
   editSheetTitle: "Edit position",
-  editSheetDescription: "Update this position's information.",
+  editSheetDescription: "Update this position.",
   emptyDescription:
     "Create your first position to define roles in your organization.",
   filteredEmptyDescription: "Try a different search.",

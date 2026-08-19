@@ -15,64 +15,50 @@ import {
   type NavigationItem,
 } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/providers/auth-provider"
 
 type SidebarNavProps = {
   collapsed?: boolean
-  onNavigate?: () => void
+  onNavigate?: (interaction: "pointer" | "keyboard") => void
+  variant?: "default" | "sidebar"
 }
 
-const itemClassName =
-  "flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-text-secondary outline-none transition-[color,background-color] duration-150 ease-out hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-surface data-[active=true]:bg-primary-soft data-[active=true]:text-primary data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-60"
+const defaultItemClassName =
+  "flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-text-secondary outline-none transition-[color,background-color] duration-150 ease-out hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-surface data-[active=true]:bg-primary-soft data-[active=true]:font-semibold data-[active=true]:text-primary data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-60"
+
+const sidebarItemClassName =
+  "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-sidebar-muted outline-none transition-[color,background-color] duration-150 ease-out hover:bg-sidebar-hover hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background data-[active=true]:bg-sidebar-active data-[active=true]:font-semibold data-[active=true]:text-sidebar-active-foreground data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-60"
 
 function SidebarNavItem({
   item,
   collapsed,
   active,
   onNavigate,
-  onLogout,
+  variant,
 }: {
   item: NavigationItem
   collapsed: boolean
   active: boolean
-  onNavigate?: () => void
-  onLogout: () => void
+  onNavigate?: (interaction: "pointer" | "keyboard") => void
+  variant: "default" | "sidebar"
 }) {
   const Icon = item.icon
+  const itemClassName =
+    variant === "sidebar" ? sidebarItemClassName : defaultItemClassName
   const content = (
     <>
       <Icon className="size-4.5 shrink-0" aria-hidden="true" />
-      <span className={cn(collapsed && "sr-only")}>{item.label}</span>
+      <span
+        className={cn(
+          "min-w-0 overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+          collapsed
+            ? "max-w-0 -translate-x-1 opacity-0"
+            : "max-w-40 translate-x-0 opacity-100",
+        )}
+      >
+        {item.label}
+      </span>
     </>
   )
-
-  if (item.action === "logout") {
-    const logoutButton = (
-      <button
-        type="button"
-        className={cn(itemClassName, collapsed && "justify-center px-0")}
-        onClick={() => {
-          onNavigate?.()
-          onLogout()
-        }}
-      >
-        {content}
-      </button>
-    )
-
-    if (!collapsed) {
-      return logoutButton
-    }
-
-    return (
-      <Tooltip>
-        <TooltipTrigger render={<span className="block" />}>
-          {logoutButton}
-        </TooltipTrigger>
-        <TooltipContent side="right">Logout</TooltipContent>
-      </Tooltip>
-    )
-  }
 
   if (item.disabled || !item.href) {
     const disabledItem = (
@@ -80,74 +66,84 @@ function SidebarNavItem({
         data-disabled="true"
         aria-disabled="true"
         tabIndex={collapsed ? 0 : undefined}
-        className={cn(itemClassName, collapsed && "justify-center px-0")}
+        className={cn(
+          itemClassName,
+          collapsed && "justify-center gap-0 px-0",
+        )}
       >
         {content}
       </span>
     )
 
-    if (!collapsed) {
-      return disabledItem
-    }
-
     return (
-      <Tooltip>
+      <Tooltip
+        disabled={!collapsed}
+        disableHoverablePopup
+      >
         <TooltipTrigger render={<span className="block" />}>
           {disabledItem}
         </TooltipTrigger>
-        <TooltipContent side="right">{item.label} unavailable</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  if (collapsed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Link
-              href={item.href}
-              data-active={active}
-              aria-current={active ? "page" : undefined}
-              className={cn(itemClassName, "justify-center px-0")}
-              onClick={onNavigate}
-            />
-          }
-        >
-          {content}
-        </TooltipTrigger>
-        <TooltipContent side="right">{item.label}</TooltipContent>
+        {collapsed ? (
+          <TooltipContent side="right">{item.label} unavailable</TooltipContent>
+        ) : null}
       </Tooltip>
     )
   }
 
   return (
-    <Link
-      href={item.href}
-      data-active={active}
-      aria-current={active ? "page" : undefined}
-      className={itemClassName}
-      onClick={onNavigate}
+    <Tooltip
+      disabled={!collapsed}
+      disableHoverablePopup
     >
-      {content}
-    </Link>
+      <TooltipTrigger
+        render={
+          <Link
+            href={item.href}
+            data-active={active}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              itemClassName,
+              collapsed && "justify-center gap-0 px-0",
+            )}
+            onClick={(event) =>
+              onNavigate?.(event.detail === 0 ? "keyboard" : "pointer")
+            }
+          />
+        }
+      >
+        {content}
+      </TooltipTrigger>
+      {collapsed ? <TooltipContent side="right">{item.label}</TooltipContent> : null}
+    </Tooltip>
   )
 }
 
 export function SidebarNav({
   collapsed = false,
   onNavigate,
+  variant = "default",
 }: SidebarNavProps) {
   const pathname = usePathname()
-  const { signOut } = useAuth()
 
   return (
-    <nav aria-label="Primary navigation" className="space-y-3">
+    <nav aria-label="Primary navigation" className="min-w-0 space-y-0">
       {navigationSections.map((section, sectionIndex) => (
         <div key={section.label}>
-          {sectionIndex > 0 && collapsed && <Separator className="mb-3" />}
+          {sectionIndex > 0 ? (
+            <Separator
+              className={cn(
+                collapsed ? "my-4" : "my-5",
+                variant === "sidebar" && "bg-sidebar-border",
+              )}
+            />
+          ) : null}
           {!collapsed && (
-            <p className="mb-1.5 px-3 text-[0.6875rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+            <p
+              className={cn(
+                "mb-2 px-3 text-[0.6875rem] font-semibold tracking-[0.1em] uppercase",
+                variant === "sidebar" ? "text-sidebar-muted" : "text-muted-foreground",
+              )}
+            >
               {section.label}
             </p>
           )}
@@ -159,7 +155,7 @@ export function SidebarNav({
                 collapsed={collapsed}
                 active={isNavigationItemActive(pathname, item)}
                 onNavigate={onNavigate}
-                onLogout={() => void signOut()}
+                variant={variant}
               />
             ))}
           </div>

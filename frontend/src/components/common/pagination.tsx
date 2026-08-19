@@ -84,7 +84,7 @@ export function Pagination({
             }}
             disabled={disabled}
           >
-            <SelectTrigger id={`${idPrefix}-page-size`} size="sm" className="w-32">
+            <SelectTrigger id={`${idPrefix}-page-size`} className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start">
@@ -101,7 +101,7 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon"
-            className="size-8"
+            className="size-10 sm:size-8"
             disabled={disabled || page === 0}
             onClick={() => onPageChange(page - 1)}
             aria-label="Previous page"
@@ -115,7 +115,7 @@ export function Pagination({
                 key={item}
                 variant={item === page ? "default" : "ghost"}
                 size="icon"
-                className="size-8"
+                className="size-10 sm:size-8"
                 disabled={disabled}
                 onClick={() => onPageChange(item)}
                 aria-label={`Page ${item + 1}`}
@@ -126,7 +126,7 @@ export function Pagination({
             ) : (
               <span
                 key={item}
-                className="flex size-8 items-center justify-center text-muted-foreground"
+                className="flex size-10 items-center justify-center text-muted-foreground sm:size-8"
                 aria-hidden="true"
               >
                 …
@@ -137,7 +137,7 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon"
-            className="size-8"
+            className="size-10 sm:size-8"
             disabled={disabled || page >= totalPages - 1}
             onClick={() => onPageChange(page + 1)}
             aria-label="Next page"

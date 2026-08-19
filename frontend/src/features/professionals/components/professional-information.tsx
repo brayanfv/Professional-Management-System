@@ -18,7 +18,9 @@ function DefinitionItem({
   return (
     <div className="space-y-1">
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium text-foreground">{children}</dd>
+      <dd className="text-sm leading-5 font-medium text-foreground">
+        {children}
+      </dd>
     </div>
   )
 }
@@ -29,13 +31,13 @@ export function ProfessionalInformation({
   professional: ProfessionalDetails
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <Card>
-        <CardHeader className="border-b border-border">
+    <div className="grid gap-4 lg:gap-5 xl:grid-cols-2">
+      <Card className="gap-0 py-0 shadow-none">
+        <CardHeader className="border-b border-border px-4 py-3 !pb-3 sm:px-5 sm:py-3.5 sm:!pb-3.5">
           <CardTitle>Personal information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+        <CardContent className="px-4 py-4 sm:px-5">
+          <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
             <DefinitionItem label="Full name">
               {professional.name}
             </DefinitionItem>
@@ -44,27 +46,27 @@ export function ProfessionalInformation({
                 ? formatDateOnly(professional.birthDate)
                 : "Not provided"}
             </DefinitionItem>
-            <DefinitionItem label="Created at">
+            <DefinitionItem label="Created">
               {formatShortDate(professional.createdAt)}
             </DefinitionItem>
-            <DefinitionItem label="Updated at">
+            <DefinitionItem label="Last updated">
               {formatShortDate(professional.updatedAt)}
             </DefinitionItem>
           </dl>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="border-b border-border">
+      <Card className="gap-0 py-0 shadow-none">
+        <CardHeader className="border-b border-border px-4 py-3 !pb-3 sm:px-5 sm:py-3.5 sm:!pb-3.5">
           <CardTitle>Employment information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+        <CardContent className="px-4 py-4 sm:px-5">
+          <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2 2xl:grid-cols-3">
             <DefinitionItem label="Department">
-              {professional.department?.name ?? "Not assigned"}
+              {professional.department?.name ?? "—"}
             </DefinitionItem>
             <DefinitionItem label="Position">
-              {professional.position?.name ?? "Not assigned"}
+              {professional.position?.name ?? "—"}
             </DefinitionItem>
             <DefinitionItem label="Status">
               <ProfessionalStatusBadge status={professional.status} />

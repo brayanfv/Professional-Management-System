@@ -3,8 +3,6 @@ import {
   BriefcaseBusinessIcon,
   Building2Icon,
   LayoutDashboardIcon,
-  LogOutIcon,
-  UserRoundIcon,
   UsersIcon,
 } from "lucide-react"
 
@@ -14,7 +12,6 @@ export type NavigationItem = {
   label: string
   icon: LucideIcon
   href?: string
-  action?: "logout"
   disabled?: boolean
 }
 
@@ -25,7 +22,7 @@ export type NavigationSection = {
 
 export const navigationSections: NavigationSection[] = [
   {
-    label: "Overview",
+    label: "Workspace",
     items: [
       {
         label: "Dashboard",
@@ -51,21 +48,6 @@ export const navigationSections: NavigationSection[] = [
         label: "Positions",
         href: routes.positions,
         icon: BriefcaseBusinessIcon,
-      },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      {
-        label: "Profile",
-        href: routes.profile,
-        icon: UserRoundIcon,
-      },
-      {
-        label: "Logout",
-        icon: LogOutIcon,
-        action: "logout",
       },
     ],
   },

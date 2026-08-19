@@ -148,7 +148,7 @@ export function ProfessionalDetailsContent({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="-mt-1 space-y-4 lg:-mt-2 lg:space-y-5">
       <Link
         href={returnHref}
         className={cn(
@@ -162,7 +162,10 @@ export function ProfessionalDetailsContent({
 
       <EntityHeader
         avatar={
-          <Avatar size="lg">
+          <Avatar
+            size="lg"
+            className="sm:data-[size=lg]:size-13"
+          >
             <AvatarFallback>{getInitials(professional.name)}</AvatarFallback>
           </Avatar>
         }
@@ -184,8 +187,9 @@ export function ProfessionalDetailsContent({
             <DropdownMenuTrigger
               render={
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="size-10 rounded-md sm:size-9"
                   aria-label="Professional actions"
                 />
               }

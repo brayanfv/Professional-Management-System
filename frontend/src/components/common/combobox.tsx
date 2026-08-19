@@ -57,7 +57,7 @@ export function Combobox({
     >
       <ComboboxPrimitive.InputGroup
         className={cn(
-          "relative flex h-10 w-full items-center rounded-md border border-border bg-surface text-sm transition-[color,background-color,border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20",
+          "relative flex h-10 w-full items-center rounded-md border border-border bg-surface text-base transition-[color,background-color,border-color,box-shadow] duration-150 ease-out hover:border-border-strong focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 sm:text-sm",
           invalid && "border-danger ring-2 ring-danger/20",
           isDisabled &&
             "cursor-not-allowed bg-surface-secondary text-muted-foreground opacity-70",
@@ -65,7 +65,7 @@ export function Combobox({
       >
         <ComboboxPrimitive.Input
           id={id}
-          className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-foreground outline-none placeholder:text-placeholder disabled:cursor-not-allowed"
+          className="h-full min-w-0 flex-1 bg-transparent px-3 text-base text-foreground outline-none placeholder:text-placeholder disabled:cursor-not-allowed sm:text-sm"
           placeholder={loading ? `Loading ${placeholder.toLowerCase()}...` : searchPlaceholder}
           aria-invalid={invalid || undefined}
           aria-describedby={describedBy}
@@ -74,14 +74,14 @@ export function Combobox({
         <div className="flex h-full shrink-0 items-center pr-1">
           {selectedOption && !isDisabled ? (
             <ComboboxPrimitive.Clear
-              className="flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25"
+              className="flex size-10 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 sm:size-8"
               aria-label={clearLabel}
             >
               <XIcon className="size-4" aria-hidden="true" />
             </ComboboxPrimitive.Clear>
           ) : null}
           <ComboboxPrimitive.Trigger
-            className="flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 disabled:pointer-events-none"
+            className="flex size-10 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 disabled:pointer-events-none sm:size-8"
             aria-label={placeholder}
           >
             <ChevronsUpDownIcon className="size-4" aria-hidden="true" />
@@ -105,7 +105,7 @@ export function Combobox({
                 <ComboboxPrimitive.Item
                   key={option.value}
                   value={option}
-                  className="grid min-h-9 cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none data-highlighted:bg-surface-secondary data-highlighted:text-foreground"
+                  className="grid min-h-10 cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none data-highlighted:bg-surface-secondary data-highlighted:text-foreground sm:min-h-9"
                 >
                   <ComboboxPrimitive.ItemIndicator className="col-start-1 text-primary">
                     <CheckIcon className="size-4" aria-hidden="true" />

@@ -67,7 +67,7 @@ function SearchField({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="relative min-w-0 flex-1">
+    <div className="relative min-w-0 flex-1 lg:min-w-64">
       <label htmlFor="professional-search" className="sr-only">
         Search professionals
       </label>
@@ -169,10 +169,10 @@ export function ProfessionalFilters({
 
   return (
     <div className="space-y-3">
-      <div className="hidden items-center gap-3 lg:flex">
+      <div className="hidden flex-wrap items-center gap-3 lg:flex">
         <SearchField value={searchValue} onChange={setSearchValue} />
 
-        <div className="w-40 shrink-0">
+        <div className="w-44 shrink-0">
           <label htmlFor="professional-status-filter" className="sr-only">
             Filter by status
           </label>
@@ -189,7 +189,10 @@ export function ProfessionalFilters({
             }
           >
             <SelectTrigger id="professional-status-filter">
-              <SelectValue />
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                Status
+              </span>
+              <SelectValue className="min-w-0 truncate" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={allValue}>All statuses</SelectItem>
@@ -199,7 +202,7 @@ export function ProfessionalFilters({
           </Select>
         </div>
 
-        <div className="w-48 shrink-0">
+        <div className="w-52 shrink-0">
           <label htmlFor="professional-department-filter" className="sr-only">
             Filter by department
           </label>
@@ -217,7 +220,11 @@ export function ProfessionalFilters({
             disabled={departmentsLoading || departmentsError}
           >
             <SelectTrigger id="professional-department-filter">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                Department
+              </span>
               <SelectValue
+                className="min-w-0 truncate"
                 placeholder={
                   departmentsLoading
                     ? "Loading departments..."
@@ -238,7 +245,7 @@ export function ProfessionalFilters({
           </Select>
         </div>
 
-        <div className="w-48 shrink-0">
+        <div className="w-52 shrink-0">
           <label htmlFor="professional-position-filter" className="sr-only">
             Filter by position
           </label>
@@ -254,7 +261,11 @@ export function ProfessionalFilters({
             disabled={positionsLoading || positionsError}
           >
             <SelectTrigger id="professional-position-filter">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                Position
+              </span>
               <SelectValue
+                className="min-w-0 truncate"
                 placeholder={
                   positionsLoading
                     ? "Loading positions..."

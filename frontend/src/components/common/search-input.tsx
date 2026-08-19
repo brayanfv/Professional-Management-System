@@ -35,7 +35,7 @@ export function SearchInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="pr-10 pl-9"
+        className="pr-12 pl-9 sm:pr-10"
         disabled={disabled}
       />
       {value ? (
@@ -43,7 +43,7 @@ export function SearchInput({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute top-1/2 right-1 size-8 -translate-y-1/2"
+          className="absolute top-1/2 right-0 size-10 -translate-y-1/2 sm:right-1 sm:size-8"
           onClick={() => onChange("")}
           aria-label={`Clear ${label.toLowerCase()}`}
           disabled={disabled}

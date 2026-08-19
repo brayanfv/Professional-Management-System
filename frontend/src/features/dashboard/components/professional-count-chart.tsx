@@ -1,7 +1,6 @@
 import {
   Bar,
   BarChart,
-  CartesianGrid,
   LabelList,
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
@@ -15,7 +14,7 @@ type CountDatum = {
   count: number
 }
 
-const maxVisibleItems = 10
+const maxVisibleItems = 8
 
 export function ProfessionalCountChart({
   data,
@@ -29,40 +28,34 @@ export function ProfessionalCountChart({
       right.count - left.count || left.name.localeCompare(right.name),
   )
   const visibleData = sortedData.slice(0, maxVisibleItems)
-  const chartHeight = Math.max(264, visibleData.length * 44)
+  const chartHeight = Math.max(164, visibleData.length * 32 + 16)
   const wasLimited = data.length > maxVisibleItems
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div
-        className="h-auto min-h-64 w-full"
+        className="h-auto min-h-40 w-full"
         style={{ height: chartHeight }}
         role="img"
         aria-label={`Professional counts by ${subject}`}
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={50}>
           <BarChart
             data={visibleData}
             layout="vertical"
-            margin={{ top: 4, right: 36, bottom: 4, left: 4 }}
+            margin={{ top: 0, right: 28, bottom: 0, left: 0 }}
             accessibilityLayer
           >
-            <CartesianGrid
-              horizontal={false}
-              stroke="var(--border)"
-              strokeDasharray="3 3"
-            />
             <XAxis
               type="number"
               allowDecimals={false}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+              domain={[0, "dataMax"]}
+              hide
             />
             <YAxis
               type="category"
               dataKey="name"
-              width={128}
+              width={136}
               axisLine={false}
               tickLine={false}
               tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
@@ -92,7 +85,8 @@ export function ProfessionalCountChart({
             <Bar
               dataKey="count"
               fill="var(--primary)"
-              radius={[0, 6, 6, 0]}
+              radius={[0, 5, 5, 0]}
+              barSize={14}
               isAnimationActive={false}
             >
               <LabelList

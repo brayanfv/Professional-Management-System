@@ -2,6 +2,7 @@
 
 import {
   CircleAlertIcon,
+  ContactRoundIcon,
   EllipsisVerticalIcon,
   PencilIcon,
   PlusIcon,
@@ -50,14 +51,14 @@ function ContactsSkeleton() {
   return (
     <div className="divide-y divide-border" aria-busy="true">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+        <div key={index} className="flex items-center gap-4 py-2.5">
           <Skeleton className="size-10 shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3 w-16" />
             <Skeleton className="h-4 w-48 max-w-full" />
           </div>
           <Skeleton className="hidden h-6 w-20 rounded-full sm:block" />
-          <Skeleton className="size-8" />
+          <Skeleton className="size-9" />
         </div>
       ))}
     </div>
@@ -77,7 +78,7 @@ function ContactItem({
   const Icon = config.icon
 
   return (
-    <li className="flex items-start gap-3 py-4 first:pt-0 last:pb-0 sm:items-center sm:gap-4">
+    <li className="flex items-start gap-4 py-2.5 sm:items-center">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
         <Icon className="size-5" aria-hidden="true" />
       </span>
@@ -85,7 +86,7 @@ function ContactItem({
         <p className="text-xs font-medium text-muted-foreground">
           {config.label}
         </p>
-        <p className="break-words text-sm font-medium text-foreground">
+        <p className="break-words text-sm leading-5 font-medium text-foreground">
           {contact.value}
         </p>
         {contact.label ? (
@@ -105,7 +106,7 @@ function ContactItem({
             <Button
               variant="ghost"
               size="icon"
-              className="size-8 shrink-0"
+              className="size-10 shrink-0 rounded-md sm:size-9"
               aria-label={`Actions for ${config.label} contact`}
             />
           }
@@ -140,11 +141,33 @@ export function ContactsSection({
   const deleteContact = useDeleteContact(professionalId)
   const [editor, setEditor] = useState<ContactEditor>(null)
   const [editorPending, setEditorPending] = useState(false)
+  const [editorDirty, setEditorDirty] = useState(false)
+  const [discardEditorOpen, setDiscardEditorOpen] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
 
   function closeEditor() {
     setEditor(null)
     setEditorPending(false)
+    setEditorDirty(false)
+    setDiscardEditorOpen(false)
+  }
+
+  function openEditor(nextEditor: Exclude<ContactEditor, null>) {
+    setEditorPending(false)
+    setEditorDirty(false)
+    setDiscardEditorOpen(false)
+    setEditor(nextEditor)
+  }
+
+  function requestEditorClose() {
+    if (editorPending) return
+
+    if (editorDirty) {
+      setDiscardEditorOpen(true)
+      return
+    }
+
+    closeEditor()
   }
 
   async function handleDeleteContact() {
@@ -175,24 +198,24 @@ export function ContactsSection({
 
   return (
     <>
-      <Card>
-        <CardHeader className="border-b border-border pb-5 sm:grid-cols-[1fr_auto] sm:items-center">
+      <Card className="gap-0 py-0 shadow-none">
+        <CardHeader className="border-b border-border px-4 py-3 !pb-3 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5 sm:py-3.5 sm:!pb-3.5">
           <div className="space-y-1">
             <CardTitle>Contacts</CardTitle>
             <CardDescription>
-              Manage contact methods for this professional.
+              Contact methods for this professional.
             </CardDescription>
           </div>
           <Button
             size="sm"
             className="mt-3 w-fit sm:mt-0"
-            onClick={() => setEditor({ mode: "create" })}
+            onClick={() => openEditor({ mode: "create" })}
           >
             <PlusIcon aria-hidden="true" />
             Add contact
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 py-0 sm:px-5">
           {contactsQuery.isPending ? <ContactsSkeleton /> : null}
 
           {contactsQuery.isError ? (
@@ -218,7 +241,10 @@ export function ContactsSection({
           ) : null}
 
           {contactsQuery.data?.length === 0 ? (
-            <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+            <div className="flex min-h-52 flex-col items-center justify-center gap-3 py-6 text-center">
+              <span className="flex size-10 items-center justify-center rounded-md bg-primary-soft text-primary">
+                <ContactRoundIcon className="size-5" aria-hidden="true" />
+              </span>
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-foreground">
                   No contacts yet
@@ -229,7 +255,7 @@ export function ContactsSection({
               </div>
               <Button
                 variant="outline"
-                onClick={() => setEditor({ mode: "create" })}
+                onClick={() => openEditor({ mode: "create" })}
               >
                 <PlusIcon aria-hidden="true" />
                 Add contact
@@ -243,7 +269,7 @@ export function ContactsSection({
                 <ContactItem
                   key={contact.id}
                   contact={contact}
-                  onEdit={() => setEditor({ mode: "edit", contact })}
+                  onEdit={() => openEditor({ mode: "edit", contact })}
                   onDelete={() => setContactToDelete(contact)}
                 />
               ))}
@@ -256,21 +282,24 @@ export function ContactsSection({
         open={editor !== null}
         disablePointerDismissal={editorPending}
         onOpenChange={(open, eventDetails) => {
-          if (!open && editorPending) {
-            eventDetails.cancel()
-            return
-          }
-          if (!open) closeEditor()
+          if (open) return
+
+          eventDetails.cancel()
+          requestEditorClose()
         }}
       >
-        <SheetContent side="right" showCloseButton={!editorPending}>
-          <SheetHeader>
+        <SheetContent
+          side="right"
+          showCloseButton={!editorPending}
+          className="sm:data-[side=right]:max-w-[29rem]"
+        >
+          <SheetHeader className="gap-1 px-5 py-4 pr-13 sm:px-6 sm:py-5 sm:pr-14">
             <SheetTitle>
               {editor?.mode === "edit" ? "Edit contact" : "Add contact"}
             </SheetTitle>
             <SheetDescription>
               {editor?.mode === "edit"
-                ? `Update this contact method for ${professionalName}.`
+                ? "Update this contact method."
                 : `Add a contact method for ${professionalName}.`}
             </SheetDescription>
           </SheetHeader>
@@ -281,13 +310,25 @@ export function ContactsSection({
               professionalId={professionalId}
               contact={editingContact}
               onSuccess={closeEditor}
-              onCancel={closeEditor}
+              onCancel={requestEditorClose}
               onContactUnavailable={handleContactUnavailable}
               onPendingChange={setEditorPending}
+              onDirtyChange={setEditorDirty}
             />
           ) : null}
         </SheetContent>
       </Sheet>
+
+      <ConfirmDialog
+        open={discardEditorOpen}
+        onOpenChange={setDiscardEditorOpen}
+        title="Discard changes?"
+        description="You have unsaved changes. If you close this form, your changes will be lost."
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        variant="destructive"
+        onConfirm={closeEditor}
+      />
 
       <ConfirmDialog
         open={contactToDelete !== null}

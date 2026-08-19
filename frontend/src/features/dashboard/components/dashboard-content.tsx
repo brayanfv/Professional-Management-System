@@ -1,15 +1,18 @@
 "use client"
 
 import {
+  BriefcaseBusinessIcon,
   Building2Icon,
   CircleAlertIcon,
+  PlusIcon,
   UserCheckIcon,
   UsersIcon,
   UserXIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 import { PageHeader } from "@/components/common/page-header"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ChartCard } from "@/features/dashboard/components/chart-card"
 import { DashboardMetricCard } from "@/features/dashboard/components/dashboard-metric-card"
 import { DashboardMetricsSkeleton } from "@/features/dashboard/components/dashboard-skeletons"
@@ -21,6 +24,7 @@ import {
   useProfessionalsByPosition,
   useRecentProfessionals,
 } from "@/features/dashboard/hooks/use-dashboard"
+import { routes } from "@/lib/routes"
 
 const recentProfessionalsLimit = 5
 
@@ -46,12 +50,18 @@ export function DashboardContent() {
       <PageHeader
         title="Dashboard"
         description="Overview of your organization"
+        actions={
+          <Link href={routes.professionals.create} className={buttonVariants()}>
+            <PlusIcon aria-hidden="true" />
+            Add professional
+          </Link>
+        }
       />
 
       {summaryQuery.isPending ? <DashboardMetricsSkeleton /> : null}
       {summaryQuery.isError ? (
         <div
-          className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-lg border border-danger/20 bg-danger-soft/40 px-6 text-center shadow-card"
+          className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-lg border border-danger/20 bg-danger-soft/40 px-6 text-center"
           role="alert"
         >
           <CircleAlertIcon
@@ -76,36 +86,48 @@ export function DashboardContent() {
         </div>
       ) : null}
       {summaryQuery.data ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           <DashboardMetricCard
             label="Total professionals"
             value={summaryQuery.data.totalProfessionals}
             icon={UsersIcon}
+            supportingText="All registered"
           />
           <DashboardMetricCard
             label="Active professionals"
             value={summaryQuery.data.activeProfessionals}
             icon={UserCheckIcon}
             tone="success"
+            supportingText="Currently active"
           />
           <DashboardMetricCard
             label="Inactive professionals"
             value={summaryQuery.data.inactiveProfessionals}
             icon={UserXIcon}
-            tone="neutral"
+            tone="warning"
+            supportingText="Not active"
           />
           <DashboardMetricCard
             label="Departments"
             value={summaryQuery.data.totalDepartments}
             icon={Building2Icon}
+            tone="department"
+            supportingText="Organization areas"
+          />
+          <DashboardMetricCard
+            label="Positions"
+            value={summaryQuery.data.totalPositions}
+            icon={BriefcaseBusinessIcon}
+            tone="position"
+            supportingText="Defined roles"
           />
         </div>
       ) : null}
 
-      <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
         <ChartCard
           title="Professionals by Department"
-          description="Professionals currently assigned to each department."
+          description="Distribution across departments"
           isLoading={departmentQuery.isPending}
           isError={departmentQuery.isError}
           isEmpty={departmentData?.length === 0}
@@ -122,7 +144,7 @@ export function DashboardContent() {
 
         <ChartCard
           title="Professionals by Position"
-          description="Professionals currently assigned to each position."
+          description="Distribution across positions"
           isLoading={positionQuery.isPending}
           isError={positionQuery.isError}
           isEmpty={positionData?.length === 0}

@@ -34,7 +34,7 @@ function ToastList() {
             <Toast.Title className="text-sm font-semibold" />
             <Toast.Description className="text-sm text-muted-foreground" />
           </div>
-          <Toast.Close className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25">
+          <Toast.Close className="flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-surface-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 sm:size-8">
             <XIcon className="size-4" aria-hidden="true" />
             <span className="sr-only">Dismiss notification</span>
           </Toast.Close>
@@ -49,7 +49,7 @@ export function AppToastProvider({ children }: { children: React.ReactNode }) {
     <Toast.Provider timeout={5000} limit={3}>
       {children}
       <Toast.Portal>
-        <Toast.Viewport className="fixed right-4 bottom-4 z-[100] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 outline-none sm:right-6 sm:bottom-6">
+        <Toast.Viewport className="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[100] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 outline-none sm:right-6 sm:bottom-6">
           <ToastList />
         </Toast.Viewport>
       </Toast.Portal>

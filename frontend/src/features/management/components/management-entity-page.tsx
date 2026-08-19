@@ -102,7 +102,10 @@ export function ManagementEntityPage({
   const [entityToDelete, setEntityToDelete] = useState<ManagementEntity | null>(
     null,
   )
-  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<{
+    title?: string
+    message: string
+  } | null>(null)
 
   useEffect(() => {
     if (!data) return
@@ -136,7 +139,10 @@ export function ManagementEntityPage({
       setEntityToDelete(null)
     } catch (error) {
       if (hasApiErrorCode(error, config.inUseCode)) {
-        setDeleteError(config.inUseMessage)
+        setDeleteError({
+          title: config.inUseTitle,
+          message: config.inUseMessage,
+        })
         toast.error(config.inUseMessage, config.inUseTitle)
         return
       }
@@ -148,7 +154,9 @@ export function ManagementEntityPage({
         return
       }
 
-      setDeleteError(`Unable to delete this ${config.entityName}. Please try again.`)
+      setDeleteError({
+        message: `Unable to delete this ${config.entityName}. Please try again.`,
+      })
     }
   }
 
@@ -156,24 +164,19 @@ export function ManagementEntityPage({
   const editorPending = editor?.mode === "edit" ? updatePending : createPending
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-5 sm:space-y-6">
       <PageHeader
         title={config.pageTitle}
         description={config.pageDescription}
         actions={
-          <Button onClick={() => setEditor({ mode: "create" })}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => setEditor({ mode: "create" })}
+          >
             <PlusIcon aria-hidden="true" />
             {config.newLabel}
           </Button>
         }
-      />
-
-      <SearchInput
-        id={`${config.entityNamePlural}-search`}
-        label={`Search ${config.entityNamePlural}`}
-        placeholder={config.searchPlaceholder}
-        value={searchInput}
-        onChange={onSearchChange}
       />
 
       <ManagementEntityList
@@ -186,6 +189,15 @@ export function ManagementEntityPage({
         isError={isError}
         isUpdating={isUpdating}
         hasSearch={Boolean(params.search)}
+        toolbar={
+          <SearchInput
+            id={`${config.entityNamePlural}-search`}
+            label={`Search ${config.entityNamePlural}`}
+            placeholder={config.searchPlaceholder}
+            value={searchInput}
+            onChange={onSearchChange}
+          />
+        }
         onRetry={onRetry}
         onCreate={() => setEditor({ mode: "create" })}
         onEdit={(entity) => setEditor({ mode: "edit", entity })}
@@ -199,12 +211,20 @@ export function ManagementEntityPage({
 
       <Sheet
         open={editor !== null}
-        onOpenChange={(open) => {
-          if (!open) requestEditorClose()
+        disablePointerDismissal={formPending}
+        onOpenChange={(open, eventDetails) => {
+          if (open) return
+
+          eventDetails.cancel()
+          requestEditorClose()
         }}
       >
-        <SheetContent side="right" showCloseButton={!formPending}>
-          <SheetHeader>
+        <SheetContent
+          side="right"
+          showCloseButton={!formPending}
+          className="sm:data-[side=right]:max-w-[29rem]"
+        >
+          <SheetHeader className="gap-1 px-5 py-4 pr-13 sm:px-6 sm:py-5 sm:pr-14">
             <SheetTitle>
               {editor?.mode === "edit"
                 ? config.editSheetTitle
@@ -271,7 +291,12 @@ export function ManagementEntityPage({
                 className="block rounded-md border border-danger/25 bg-danger-soft px-3 py-2 text-danger-foreground"
                 role="alert"
               >
-                {deleteError}
+                {deleteError.title ? (
+                  <span className="mb-1 block font-medium">
+                    {deleteError.title}
+                  </span>
+                ) : null}
+                <span className="block">{deleteError.message}</span>
               </span>
             ) : null}
           </span>

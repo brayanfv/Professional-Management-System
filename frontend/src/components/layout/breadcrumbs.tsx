@@ -12,11 +12,19 @@ type BreadcrumbItem = {
 }
 
 function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
-  if (pathname === routes.dashboard) {
-    return [{ label: "Dashboard" }]
+  const topLevelRoutes: readonly string[] = [
+    routes.dashboard,
+    routes.professionals.list,
+    routes.departments,
+    routes.positions,
+    routes.profile,
+  ]
+
+  if (topLevelRoutes.includes(pathname)) {
+    return []
   }
 
-  if (pathname.startsWith(routes.professionals.list)) {
+  if (pathname.startsWith(`${routes.professionals.list}/`)) {
     const items: BreadcrumbItem[] = [
       { label: "Professionals", href: routes.professionals.list },
     ]
@@ -32,20 +40,6 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
     if (/^\/professionals\/[^/]+$/.test(pathname)) {
       return [...items, { label: "Professional details" }]
     }
-
-    return [{ label: "Professionals" }]
-  }
-
-  if (pathname === routes.departments) {
-    return [{ label: "Departments" }]
-  }
-
-  if (pathname === routes.positions) {
-    return [{ label: "Positions" }]
-  }
-
-  if (pathname === routes.profile) {
-    return [{ label: "Profile" }]
   }
 
   return []

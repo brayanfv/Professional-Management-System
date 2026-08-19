@@ -64,6 +64,7 @@ type ContactFormProps = {
   onCancel: () => void
   onContactUnavailable: () => void
   onPendingChange: (pending: boolean) => void
+  onDirtyChange: (dirty: boolean) => void
 }
 
 export function ContactForm({
@@ -74,6 +75,7 @@ export function ContactForm({
   onCancel,
   onContactUnavailable,
   onPendingChange,
+  onDirtyChange,
 }: ContactFormProps) {
   const toast = useAppToast()
   const createContact = useCreateContact(professionalId)
@@ -84,7 +86,7 @@ export function ContactForm({
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -102,6 +104,10 @@ export function ContactForm({
   useEffect(() => {
     onPendingChange(isPending)
   }, [isPending, onPendingChange])
+
+  useEffect(() => {
+    onDirtyChange(isDirty)
+  }, [isDirty, onDirtyChange])
 
   async function onSubmit(values: ContactFormValues) {
     setFormError(null)
@@ -138,7 +144,7 @@ export function ContactForm({
         return
       }
 
-      setFormError("Unable to save this contact. Please try again.")
+      setFormError("Unable to save contact. Your changes have not been saved.")
     } finally {
       onPendingChange(false)
     }
@@ -150,7 +156,7 @@ export function ContactForm({
       onSubmit={handleSubmit(onSubmit)}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex-1 space-y-5 overflow-y-auto p-6">
+      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
         {formError ? (
           <div
             className="rounded-md border border-danger/25 bg-danger-soft px-3 py-2.5 text-sm text-danger-foreground"
@@ -208,6 +214,7 @@ export function ContactForm({
             type={selectedType === "EMAIL" ? "email" : "text"}
             inputMode={selectedType === "EMAIL" ? "email" : "text"}
             placeholder={getContactTypeConfig(selectedType).placeholder}
+            className="font-medium"
             aria-invalid={Boolean(errors.value)}
             aria-describedby={errors.value ? "contact-value-error" : undefined}
             disabled={isPending}
@@ -236,7 +243,7 @@ export function ContactForm({
         </FormField>
       </div>
 
-      <SheetFooter>
+      <SheetFooter className="px-5 py-4 sm:px-6 [&>button]:w-full sm:[&>button]:w-auto">
         <Button
           type="button"
           variant="outline"

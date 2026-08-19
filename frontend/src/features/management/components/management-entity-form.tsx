@@ -147,7 +147,7 @@ export function ManagementEntityForm({
       onSubmit={handleSubmit(onSubmit)}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex-1 space-y-5 overflow-y-auto p-6">
+      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
         {formError ? (
           <div
             className="rounded-md border border-danger/25 bg-danger-soft px-3 py-2.5 text-sm text-danger-foreground"
@@ -197,7 +197,7 @@ export function ManagementEntityForm({
         </FormField>
       </div>
 
-      <SheetFooter>
+      <SheetFooter className="px-5 py-4 sm:px-6 [&>button]:w-full sm:[&>button]:w-auto">
         <Button
           type="button"
           variant="outline"

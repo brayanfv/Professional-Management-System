@@ -4,18 +4,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function DashboardMetricsSkeleton() {
   return (
     <div
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
       aria-label="Loading dashboard summary"
       aria-busy="true"
     >
-      {Array.from({ length: 4 }, (_, index) => (
-        <Card key={index}>
-          <CardContent className="flex items-start justify-between gap-4">
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-9 w-20" />
+      {Array.from({ length: 5 }, (_, index) => (
+        <Card key={index} className="gap-0 shadow-none [--card-spacing:1.25rem]">
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="size-9 shrink-0" />
+              <Skeleton className="h-4 w-28" />
             </div>
-            <Skeleton className="size-10" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-24" />
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -27,10 +30,10 @@ export function ChartSkeleton() {
   return (
     <div className="space-y-4" aria-label="Loading chart" aria-busy="true">
       {Array.from({ length: 5 }, (_, index) => (
-        <div key={index} className="flex items-center gap-4">
+        <div key={index} className="flex items-center gap-3">
           <Skeleton className="h-4 w-28 shrink-0" />
           <Skeleton
-            className="h-7"
+            className="h-4"
             style={{ width: `${82 - index * 10}%` }}
           />
         </div>
@@ -41,8 +44,12 @@ export function ChartSkeleton() {
 
 export function RecentProfessionalsSkeleton() {
   return (
-    <Card aria-label="Loading recent professionals" aria-busy="true">
-      <CardHeader>
+    <Card
+      aria-label="Loading recent professionals"
+      aria-busy="true"
+      className="gap-0 shadow-none [--card-spacing:1.25rem]"
+    >
+      <CardHeader className="pb-4">
         <Skeleton className="h-5 w-44" />
         <Skeleton className="h-4 w-64 max-w-full" />
       </CardHeader>

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useTransition } from "react"
 
 import { PageHeader } from "@/components/common/page-header"
 import { buttonVariants } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { useDepartments } from "@/features/departments/hooks/use-departments"
 import { usePositions } from "@/features/positions/hooks/use-positions"
 import { ProfessionalFilters } from "@/features/professionals/components/professional-filters"
@@ -105,32 +106,42 @@ export function ProfessionalsPageContent({
         }
       />
 
-      <ProfessionalFilters
-        key={params.search ?? ""}
-        params={params}
-        departments={departmentsQuery.data ?? []}
-        positions={positionsQuery.data ?? []}
-        departmentsLoading={departmentsQuery.isPending}
-        positionsLoading={positionsQuery.isPending}
-        departmentsError={departmentsQuery.isError}
-        positionsError={positionsQuery.isError}
-        onParamsChange={updateParams}
-        onClearFilters={clearFilters}
-      />
+      <Card
+        className="gap-0 py-0 shadow-none"
+        aria-busy={professionalsQuery.isPending || isUpdating}
+        aria-label="Professionals directory"
+      >
+        <CardContent className="p-0">
+          <div className="border-b border-border bg-surface-secondary/30 px-4 py-4 sm:px-5">
+            <ProfessionalFilters
+              key={params.search ?? ""}
+              params={params}
+              departments={departmentsQuery.data ?? []}
+              positions={positionsQuery.data ?? []}
+              departmentsLoading={departmentsQuery.isPending}
+              positionsLoading={positionsQuery.isPending}
+              departmentsError={departmentsQuery.isError}
+              positionsError={positionsQuery.isError}
+              onParamsChange={updateParams}
+              onClearFilters={clearFilters}
+            />
+          </div>
 
-      <ProfessionalList
-        data={professionalsQuery.data}
-        params={params}
-        isPending={professionalsQuery.isPending}
-        isError={professionalsQuery.isError}
-        isUpdating={isUpdating}
-        hasFilters={hasProfessionalFilters(params)}
-        onRetry={() => void professionalsQuery.refetch()}
-        onClearFilters={clearFilters}
-        onSort={handleSort}
-        onPageChange={(page) => updateParams({ page })}
-        onPageSizeChange={(size) => updateParams({ page: 0, size })}
-      />
+          <ProfessionalList
+            data={professionalsQuery.data}
+            params={params}
+            isPending={professionalsQuery.isPending}
+            isError={professionalsQuery.isError}
+            isUpdating={isUpdating}
+            hasFilters={hasProfessionalFilters(params)}
+            onRetry={() => void professionalsQuery.refetch()}
+            onClearFilters={clearFilters}
+            onSort={handleSort}
+            onPageChange={(page) => updateParams({ page })}
+            onPageSizeChange={(size) => updateParams({ page: 0, size })}
+          />
+        </CardContent>
+      </Card>
     </section>
   )
 }

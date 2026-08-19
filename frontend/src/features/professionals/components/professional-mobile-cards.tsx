@@ -18,7 +18,7 @@ export function ProfessionalMobileCards({
   return (
     <ul className="divide-y divide-border lg:hidden" aria-label="Professionals">
       {professionals.map((professional) => (
-        <li key={professional.id} className="space-y-4 p-4 sm:p-5">
+        <li key={professional.id} className="space-y-3.5 p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <Avatar>
               <AvatarFallback>{getInitials(professional.name)}</AvatarFallback>
@@ -29,7 +29,7 @@ export function ProfessionalMobileCards({
                   professional.id,
                   returnHref,
                 )}
-                className="block truncate font-medium text-foreground outline-none transition-colors hover:text-primary hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary/25"
+                className="block truncate font-semibold text-foreground outline-none transition-colors hover:text-primary hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary/25"
               >
                 {professional.name}
               </Link>

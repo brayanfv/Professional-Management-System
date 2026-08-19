@@ -15,6 +15,7 @@ import { getSortParts } from "@/features/professionals/professional-list-params"
 import { getProfessionalDetailsHref } from "@/features/professionals/professional-navigation"
 import { formatShortDate } from "@/lib/date"
 import { getInitials } from "@/lib/name"
+import { cn } from "@/lib/utils"
 import type {
   ProfessionalSort,
   ProfessionalSortField,
@@ -50,7 +51,10 @@ function SortableHeader({
       <Button
         variant="ghost"
         size="sm"
-        className="-ml-3 h-8 px-3 text-xs text-muted-foreground"
+        className={cn(
+          "-ml-2 h-8 gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:text-foreground",
+          active && "text-foreground",
+        )}
         onClick={() => onSort(field)}
       >
         {label}
@@ -72,9 +76,17 @@ export function ProfessionalsTable({
   returnHref: string
 }) {
   return (
-    <div className="hidden overflow-x-auto lg:block">
-      <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
+    <div className="hidden min-w-0 lg:block">
+      <table className="w-full table-fixed border-collapse text-left text-sm">
         <caption className="sr-only">Professionals directory</caption>
+        <colgroup>
+          <col className="w-[32%]" />
+          <col className="w-[17%]" />
+          <col className="w-[20%]" />
+          <col className="w-[12%]" />
+          <col className="w-[12%]" />
+          <col className="w-14" />
+        </colgroup>
         <thead>
           <tr className="border-b border-border bg-surface-secondary/40 text-xs text-muted-foreground">
             <SortableHeader
@@ -83,10 +95,10 @@ export function ProfessionalsTable({
               sort={sort}
               onSort={onSort}
             />
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-5 py-3 font-medium">
               Department
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-5 py-3 font-medium">
               Position
             </th>
             <SortableHeader
@@ -101,7 +113,7 @@ export function ProfessionalsTable({
               sort={sort}
               onSort={onSort}
             />
-            <th scope="col" className="w-14 px-4 py-3 font-medium">
+            <th scope="col" className="w-14 px-3 py-3 font-medium">
               <span className="sr-only">Actions</span>
             </th>
           </tr>
@@ -110,11 +122,11 @@ export function ProfessionalsTable({
           {professionals.map((professional) => (
             <tr
               key={professional.id}
-              className="border-b border-border transition-colors hover:bg-surface-secondary/40 last:border-0"
+              className="border-b border-border transition-colors hover:bg-surface-secondary/60 last:border-0"
             >
-              <td className="px-4 py-4">
+              <td className="px-5 py-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <Avatar size="sm">
+                  <Avatar size="sm" className="data-[size=sm]:size-9">
                     <AvatarFallback>{getInitials(professional.name)}</AvatarFallback>
                   </Avatar>
                   <Link
@@ -122,25 +134,35 @@ export function ProfessionalsTable({
                       professional.id,
                       returnHref,
                     )}
-                    className="truncate font-medium text-foreground outline-none transition-colors hover:text-primary hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary/25"
+                    className="block truncate font-semibold text-foreground outline-none transition-colors hover:text-primary hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary/25"
                   >
                     {professional.name}
                   </Link>
                 </div>
               </td>
-              <td className="px-4 py-4 text-text-secondary">
+              <td
+                className={cn(
+                  "truncate px-5 py-4 text-text-secondary",
+                  !professional.department && "text-muted-foreground",
+                )}
+              >
                 {professional.department?.name ?? "—"}
               </td>
-              <td className="px-4 py-4 text-text-secondary">
+              <td
+                className={cn(
+                  "truncate px-5 py-4 text-text-secondary",
+                  !professional.position && "text-muted-foreground",
+                )}
+              >
                 {professional.position?.name ?? "—"}
               </td>
-              <td className="px-4 py-4">
+              <td className="px-5 py-4">
                 <ProfessionalStatusBadge status={professional.status} />
               </td>
-              <td className="px-4 py-4 whitespace-nowrap text-muted-foreground">
+              <td className="px-5 py-4 whitespace-nowrap text-xs text-muted-foreground">
                 {formatShortDate(professional.createdAt)}
               </td>
-              <td className="px-4 py-4 text-right">
+              <td className="px-3 py-4 text-right">
                 <ProfessionalActions
                   professionalId={professional.id}
                   returnHref={returnHref}

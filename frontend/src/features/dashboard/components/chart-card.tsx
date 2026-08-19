@@ -33,18 +33,18 @@ export function ChartCard({
   children,
 }: ChartCardProps) {
   return (
-    <Card className="min-w-0">
-      <CardHeader>
+    <Card className="min-w-0 gap-0 shadow-none [--card-spacing:1.25rem]">
+      <CardHeader className="pb-4">
         <CardTitle>{title}</CardTitle>
         {description ? (
           <CardDescription>{description}</CardDescription>
         ) : null}
       </CardHeader>
-      <CardContent className="min-h-72">
+      <CardContent className="min-h-0">
         {isLoading ? <ChartSkeleton /> : null}
         {!isLoading && isError ? (
           <div
-            className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-md border border-danger/20 bg-danger-soft/40 px-6 text-center"
+            className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-md border border-danger/20 bg-danger-soft/40 px-6 text-center"
             role="alert"
           >
             <CircleAlertIcon
@@ -60,7 +60,7 @@ export function ChartCard({
           </div>
         ) : null}
         {!isLoading && !isError && isEmpty ? (
-          <div className="flex min-h-64 items-center justify-center rounded-md border border-dashed border-border px-6 text-center">
+          <div className="flex min-h-44 items-center justify-center rounded-md border border-dashed border-border px-6 text-center">
             <p className="text-sm text-muted-foreground">{emptyMessage}</p>
           </div>
         ) : null}
