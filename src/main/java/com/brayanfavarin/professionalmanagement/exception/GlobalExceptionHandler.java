@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
         return response(HttpStatus.CONFLICT, ex.getCode(), ex.getMessage(), req, null);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> dataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
+        IntegrityError error = integrityError(ex);
+        log.warn("Data integrity conflict while processing {} {}", req.getMethod(), req.getRequestURI());
+        return response(HttpStatus.CONFLICT, error.code(), error.message(), req, null);
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiErrorResponse> invalidCredentials(InvalidCredentialsException ex, HttpServletRequest req) {
         return response(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid email or password", req, null);
@@ -73,5 +81,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(new ApiErrorResponse(
                 OffsetDateTime.now(ZoneOffset.UTC), status.value(), status.getReasonPhrase(), code, message,
                 req.getRequestURI(), fields));
+    }
+
+    private IntegrityError integrityError(DataIntegrityViolationException exception) {
+        if (DatabaseConstraintViolation.isUniqueViolation(exception)) {
+            return switch (DatabaseConstraintViolation.constraintName(exception).orElse("")) {
+                case DatabaseConstraintViolation.DEPARTMENT_NAME_UNIQUE ->
+                    new IntegrityError("DUPLICATE_DEPARTMENT", "Department name already exists");
+                case DatabaseConstraintViolation.POSITION_NAME_UNIQUE ->
+                    new IntegrityError("DUPLICATE_POSITION", "Position name already exists");
+                default -> new IntegrityError("DATA_INTEGRITY_VIOLATION", "The operation conflicts with existing data");
+            };
+        }
+
+        if (DatabaseConstraintViolation.isForeignKeyViolation(exception,
+                DatabaseConstraintViolation.PROFESSIONAL_DEPARTMENT_FOREIGN_KEY)) {
+            return new IntegrityError("DEPARTMENT_IN_USE", "Department is in use");
+        }
+        if (DatabaseConstraintViolation.isForeignKeyViolation(exception,
+                DatabaseConstraintViolation.PROFESSIONAL_POSITION_FOREIGN_KEY)) {
+            return new IntegrityError("POSITION_IN_USE", "Position is in use");
+        }
+
+        return new IntegrityError("DATA_INTEGRITY_VIOLATION", "The operation conflicts with existing data");
+    }
+
+    private record IntegrityError(String code, String message) {
     }
 }

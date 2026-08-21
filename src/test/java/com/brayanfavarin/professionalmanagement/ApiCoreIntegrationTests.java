@@ -1,5 +1,7 @@
 package com.brayanfavarin.professionalmanagement;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -55,5 +57,50 @@ class ApiCoreIntegrationTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].name").value("Brayan"));
         mvc.perform(delete("/api/professionals/{professionalId}/contacts/{contactId}", second.getId(), contact.getId()))
                 .andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("CONTACT_NOT_FOUND"));
+    }
+
+    @Test void normalizesTextualInputAndKeepsBlankRequiredValuesInvalid() throws Exception {
+        mvc.perform(post("/api/departments").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"  Technology  \",\"description\":\"  Platform team  \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Technology"))
+                .andExpect(jsonPath("$.description").value("Platform team"));
+
+        mvc.perform(post("/api/positions").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"  Developer  \",\"description\":\"   \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Developer"))
+                .andExpect(jsonPath("$.description").value(nullValue()));
+
+        mvc.perform(post("/api/departments").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"   \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fields.name").exists());
+
+        mvc.perform(post("/api/professionals").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"  Ada Lovelace  \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Ada Lovelace"));
+
+        Professional professional = professionals.findAll().getFirst();
+        mvc.perform(post("/api/professionals/{professionalId}/contacts", professional.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"type\":\"EMAIL\",\"value\":\"  ada@example.test  \",\"label\":\"  Work  \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.value").value("ada@example.test"))
+                .andExpect(jsonPath("$.label").value("Work"));
+
+        Contact contact = contacts.findAll().getFirst();
+        mvc.perform(put("/api/professionals/{professionalId}/contacts/{contactId}", professional.getId(), contact.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"type\":\"EMAIL\",\"value\":\" ada@example.test \",\"label\":\"   \"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.label").value(nullValue()));
+
+        assertThat(contacts.findById(contact.getId())).hasValueSatisfying(saved -> {
+            assertThat(saved.getValue()).isEqualTo("ada@example.test");
+            assertThat(saved.getLabel()).isNull();
+        });
     }
 }

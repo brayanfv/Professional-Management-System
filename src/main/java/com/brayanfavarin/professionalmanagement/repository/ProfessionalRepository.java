@@ -28,6 +28,9 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
     @EntityGraph(attributePaths = {"department", "position", "contacts"})
     Optional<Professional> findDetailsById(Long id);
 
+    @EntityGraph(attributePaths = {"department", "position"})
+    Optional<Professional> findSummaryById(Long id);
+
     long countByStatus(ProfessionalStatus status);
 
     @Query("select new com.brayanfavarin.professionalmanagement.dto.dashboard.DepartmentProfessionalCountResponse(d.id, d.name, count(p)) "

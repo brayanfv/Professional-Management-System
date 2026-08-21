@@ -25,9 +25,9 @@ public class ContactService {
     @Transactional(readOnly = true)
     public List<ContactResponse> list(Long professionalId) { professional(professionalId); return contacts.findByProfessionalId(professionalId).stream().map(ContactMapper::toResponse).toList(); }
     @Transactional
-    public ContactResponse create(Long professionalId, CreateContactRequest request) { Professional professional = professional(professionalId); validate(request.type(), request.value()); Contact c = new Contact(); c.setProfessional(professional); c.setType(request.type()); c.setValue(request.value()); c.setLabel(request.label()); return ContactMapper.toResponse(contacts.save(c)); }
+    public ContactResponse create(Long professionalId, CreateContactRequest request) { Professional professional = professional(professionalId); String value = InputNormalizer.required(request.value()); validate(request.type(), value); Contact c = new Contact(); c.setProfessional(professional); c.setType(request.type()); c.setValue(value); c.setLabel(InputNormalizer.optional(request.label())); return ContactMapper.toResponse(contacts.save(c)); }
     @Transactional
-    public ContactResponse update(Long professionalId, Long contactId, UpdateContactRequest request) { Contact c = owned(professionalId, contactId); validate(request.type(), request.value()); c.setType(request.type()); c.setValue(request.value()); c.setLabel(request.label()); return ContactMapper.toResponse(c); }
+    public ContactResponse update(Long professionalId, Long contactId, UpdateContactRequest request) { Contact c = owned(professionalId, contactId); String value = InputNormalizer.required(request.value()); validate(request.type(), value); c.setType(request.type()); c.setValue(value); c.setLabel(InputNormalizer.optional(request.label())); return ContactMapper.toResponse(c); }
     @Transactional
     public void delete(Long professionalId, Long contactId) { contacts.delete(owned(professionalId, contactId)); }
     private Professional professional(Long id) { return professionals.findById(id).orElseThrow(() -> new ResourceNotFoundException("PROFESSIONAL_NOT_FOUND", "Professional not found")); }
