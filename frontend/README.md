@@ -48,12 +48,46 @@ Open [http://localhost:3000](http://localhost:3000). The root route redirects to
 ```bash
 npm run lint
 npm run typecheck
+npm run test
 npm run build
 ```
 
 The API client uses native `fetch`, maps the backend error contract, includes
 browser credentials centrally, and mirrors the readable CSRF cookie into the
 `X-XSRF-TOKEN` header for state-changing requests.
+
+## Automated testing
+
+Unit and component tests use Vitest, React Testing Library, and jsdom:
+
+```bash
+npm run test
+npm run test:watch
+```
+
+The Playwright smoke test uses Chromium against the real frontend, backend, and
+an isolated PostgreSQL 16 environment. It never uses the development database.
+Start the disposable environment from `frontend` (Docker Desktop must be
+running), then run the test:
+
+```bash
+npm run e2e:env:up
+npx playwright install chromium
+npm run test:e2e
+```
+
+It starts the production Next.js server on `http://127.0.0.1:3001` and uses the
+backend on `http://127.0.0.1:8081`. The Compose PostgreSQL data directory is a
+container tmpfs and is discarded when the environment is stopped:
+
+```bash
+npm run e2e:env:down
+```
+
+The default E2E administrator is a test-only account. Override it only through
+`E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD` when a different isolated test
+identity is required. Do not point `E2E_API_URL` or `E2E_BASE_URL` at a shared
+or production environment.
 
 ## Design system foundation
 

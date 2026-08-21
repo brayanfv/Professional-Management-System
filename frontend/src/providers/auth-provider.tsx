@@ -97,8 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [clearSession, router])
 
   const signIn = useCallback(async (credentials: LoginRequest) => {
-    const response = await requestLogin(credentials)
-    setUser(response.user)
+    await requestLogin(credentials)
+    const authenticatedUser = await getMe()
+    setUser(authenticatedUser)
     setStatus("authenticated")
   }, [])
 

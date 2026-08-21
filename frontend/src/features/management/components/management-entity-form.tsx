@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircleIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
 
 import { FormField, FormLabel } from "@/components/common/form-field"
 import { FormMessage } from "@/components/common/form-message"
@@ -13,24 +12,14 @@ import { Input } from "@/components/ui/input"
 import { SheetFooter } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import type { ManagementEntity } from "@/features/management/components/management-entity-list"
+import {
+  managementEntitySchema,
+  type ManagementEntityFormValues,
+} from "@/features/management/management-entity-schema"
 import { ApiClientError } from "@/lib/api/client"
 import { hasApiErrorCode } from "@/lib/api/errors"
 import { useAppToast } from "@/providers/toast-provider"
 import type { ManagementEntityRequest } from "@/types/management"
-
-const managementEntitySchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Name is required.")
-    .max(120, "Name must be 120 characters or fewer."),
-  description: z
-    .string()
-    .trim()
-    .max(500, "Description must be 500 characters or fewer."),
-})
-
-type ManagementEntityFormValues = z.infer<typeof managementEntitySchema>
 
 export type ManagementFeatureFormProps = {
   mode: "create" | "edit"

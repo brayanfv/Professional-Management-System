@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircleIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
 
 import { FormField, FormLabel } from "@/components/common/form-field"
 import { FormMessage } from "@/components/common/form-message"
@@ -20,6 +19,10 @@ import {
 import { SheetFooter } from "@/components/ui/sheet"
 import { getContactTypeConfig } from "@/features/contacts/contact-utils"
 import {
+  contactSchema,
+  type ContactFormValues,
+} from "@/features/contacts/contact-schema"
+import {
   useCreateContact,
   useUpdateContact,
 } from "@/features/contacts/hooks/use-contact-mutations"
@@ -27,34 +30,6 @@ import { ApiClientError } from "@/lib/api/client"
 import { hasApiErrorCode } from "@/lib/api/errors"
 import { useAppToast } from "@/providers/toast-provider"
 import type { Contact, ContactType } from "@/types/contact"
-
-const contactSchema = z
-  .object({
-    type: z.enum(["EMAIL", "PHONE", "MOBILE", "OTHER"]),
-    value: z
-      .string()
-      .trim()
-      .min(1, "Value is required.")
-      .max(255, "Value must be 255 characters or fewer."),
-    label: z
-      .string()
-      .trim()
-      .max(80, "Label must be 80 characters or fewer."),
-  })
-  .superRefine((values, context) => {
-    if (
-      values.type === "EMAIL" &&
-      !z.string().email().safeParse(values.value).success
-    ) {
-      context.addIssue({
-        code: "custom",
-        path: ["value"],
-        message: "Enter a valid email address.",
-      })
-    }
-  })
-
-type ContactFormValues = z.infer<typeof contactSchema>
 
 type ContactFormProps = {
   mode: "create" | "edit"

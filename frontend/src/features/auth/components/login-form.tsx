@@ -5,7 +5,6 @@ import { CircleAlertIcon, LoaderCircleIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
 
 import {
   AuthLoadingScreen,
@@ -18,20 +17,13 @@ import { Brand } from "@/components/layout/brand"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LoginHero } from "@/features/auth/components/login-hero"
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "@/features/auth/login-schema"
 import { ApiClientError } from "@/lib/api/client"
 import { routes } from "@/lib/routes"
 import { useAuth } from "@/providers/auth-provider"
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, "Email is required.")
-    .email("Enter a valid email address."),
-  password: z.string().min(1, "Password is required."),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
 
 function getLoginErrorMessage(error: unknown) {
   if (
