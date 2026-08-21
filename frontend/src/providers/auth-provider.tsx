@@ -8,11 +8,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 
 import { subscribeToUnauthorized } from "@/features/auth/auth-events"
-import { authStorage } from "@/features/auth/auth-storage"
 import type {
   AuthenticatedUser,
   LoginRequest,
@@ -49,9 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null)
   const [status, setStatus] = useState<AuthStatus>("loading")
   const [restoreAttempt, setRestoreAttempt] = useState(0)
+  const signOutInFlight = useRef<Promise<void> | null>(null)
 
   const clearSession = useCallback(() => {
-    authStorage.clearAccessToken()
     queryClient.clear()
     setUser(null)
     setStatus("unauthenticated")
@@ -63,22 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function restoreSession() {
       await Promise.resolve()
 
-      const accessToken = authStorage.getAccessToken()
-      if (!accessToken) {
-        if (active) {
-          setStatus("unauthenticated")
-        }
-        return
-      }
-
       try {
         const authenticatedUser = await getMe()
-        if (active && authStorage.getAccessToken() === accessToken) {
+        if (active) {
           setUser(authenticatedUser)
           setStatus("authenticated")
         }
       } catch (error) {
-        if (!active || authStorage.getAccessToken() !== accessToken) return
+        if (!active) return
 
         if (error instanceof ApiClientError && error.details.status === 401) {
           clearSession()
@@ -106,22 +98,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback(async (credentials: LoginRequest) => {
     const response = await requestLogin(credentials)
-    authStorage.setAccessToken(response.accessToken)
     setUser(response.user)
     setStatus("authenticated")
   }, [])
 
   const signOut = useCallback(async () => {
-    try {
-      if (authStorage.getAccessToken()) {
-        await requestLogout()
-      }
-    } catch {
-      // Stateless logout still completes locally if the backend is unavailable.
-    } finally {
-      clearSession()
-      router.replace(routes.login)
+    if (signOutInFlight.current) {
+      return signOutInFlight.current
     }
+
+    const signOutRequest = (async () => {
+      try {
+        await requestLogout()
+      } catch {
+        // The local state is still cleared when the backend is unavailable.
+      } finally {
+        clearSession()
+        router.replace(routes.login)
+      }
+    })()
+
+    signOutInFlight.current = signOutRequest
+    void signOutRequest.finally(() => {
+      signOutInFlight.current = null
+    })
+
+    return signOutRequest
   }, [clearSession, router])
 
   const retrySession = useCallback(() => {

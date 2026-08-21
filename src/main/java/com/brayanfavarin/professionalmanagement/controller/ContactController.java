@@ -33,7 +33,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/professionals/{professionalId}/contacts")
 @Tag(name = "Contacts", description = "Contacts belonging to a professional")
-@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+@SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
 public class ContactController {
 
     private final ContactService service;

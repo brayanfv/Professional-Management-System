@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.brayanfavarin.professionalmanagement.dto.auth.AuthenticatedUserResponse;
 import com.brayanfavarin.professionalmanagement.dto.auth.LoginRequest;
-import com.brayanfavarin.professionalmanagement.dto.auth.LoginResponse;
 import com.brayanfavarin.professionalmanagement.exception.InvalidCredentialsException;
 import com.brayanfavarin.professionalmanagement.model.User;
 import com.brayanfavarin.professionalmanagement.repository.UserRepository;
+import com.brayanfavarin.professionalmanagement.security.AuthenticatedSession;
 import com.brayanfavarin.professionalmanagement.security.JwtService;
 
 @Service
@@ -30,7 +30,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest request) {
+    public AuthenticatedSession login(LoginRequest request) {
         String email = normalizeEmail(request.email());
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, request.password()));
@@ -42,8 +42,7 @@ public class AuthService {
         if (!user.isActive()) {
             throw new InvalidCredentialsException();
         }
-        return new LoginResponse(jwtService.generateToken(user.getEmail(), user.getRole()), "Bearer",
-                jwtService.getExpirationSeconds(), toResponse(user));
+        return new AuthenticatedSession(jwtService.generateToken(user.getEmail(), user.getRole()), toResponse(user));
     }
 
     @Transactional(readOnly = true)

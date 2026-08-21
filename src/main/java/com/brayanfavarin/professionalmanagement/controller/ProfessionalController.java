@@ -44,7 +44,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/professionals")
 @Tag(name = "Professionals", description = "Professional management")
-@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+@SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
 public class ProfessionalController {
 
     private static final Set<String> SORTABLE = Set.of("name", "birthDate", "status", "createdAt", "updatedAt");

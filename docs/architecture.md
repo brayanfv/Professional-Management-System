@@ -622,7 +622,7 @@ Frontend
 Nas próximas requisições:
 
 ```text
-Authorization: Bearer <token>
+JWT stored in HttpOnly pm_session cookie; state-changing requests also send X-XSRF-TOKEN
 ```
 
 O backend deverá validar o token antes de permitir acesso aos endpoints protegidos.

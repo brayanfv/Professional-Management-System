@@ -77,15 +77,12 @@ Não será adicionada essa complexidade antecipadamente.
 
 # 3. Autenticação
 
-Endpoints administrativos serão protegidos utilizando JWT.
+Endpoints administrativos são protegidos por JWT transportado em um cookie de
+sessão HttpOnly. O browser envia o cookie automaticamente para a API; o token
+nunca é devolvido no JSON de login ou disponibilizado ao JavaScript.
 
-O token deverá ser enviado conforme o mecanismo definido durante a implementação da segurança.
-
-Conceitualmente:
-
-```text
-Authorization: Bearer <token>
-```
+Operações que alteram estado também exigem o header `X-XSRF-TOKEN`, com o valor
+do cookie legível `XSRF-TOKEN` emitido pelo Spring Security.
 
 Endpoints públicos inicialmente:
 
@@ -130,15 +127,11 @@ POST /api/auth/login
 
 ### Response — 200 OK
 
-A estrutura definitiva do token será definida durante a implementação de segurança.
-
-Exemplo conceitual:
+O backend responde com os dados do usuário e envia o JWT exclusivamente no
+cookie HttpOnly `pm_session`. Exemplo de corpo:
 
 ```json
 {
-  "accessToken": "<token>",
-  "tokenType": "Bearer",
-  "expiresIn": 3600,
   "user": {
     "id": 1,
     "name": "Administrator",
@@ -191,10 +184,8 @@ POST /api/auth/logout
 ```
 
 A API utiliza JWT stateless sem refresh token persistido. Este endpoint retorna
-`204 No Content`; o cliente realiza o logout descartando o access token de
-forma segura. Não existe blacklist de tokens nesta etapa.
-
-Essa decisão será detalhada durante a implementação da segurança.
+`204 No Content` e expira o cookie HttpOnly de sessão. Não existe blacklist de
+tokens nesta etapa.
 
 ---
 

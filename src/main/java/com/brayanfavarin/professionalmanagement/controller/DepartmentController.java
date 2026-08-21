@@ -34,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/departments")
 @Tag(name = "Departments", description = "Department management")
-@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+@SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
 public class DepartmentController {
 
     private static final Set<String> SORTABLE = Set.of("name", "createdAt", "updatedAt");

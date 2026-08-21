@@ -10,8 +10,8 @@ The project has completed the Foundation, Database + Domain Migration, and API
 Core stages, Security + JWT, Dashboard, and OpenAPI/Swagger. It exposes
 authenticated, paginated REST endpoints for Professionals, Contacts,
 Departments, Positions, and dashboard summaries under `/api`.
-`POST /api/auth/login` is public; the remaining `/api/**` resources require a
-Bearer access token.
+`POST /api/auth/login` creates an HttpOnly JWT session cookie; the remaining
+`/api/**` resources require that session.
 
 ## Current stack
 
@@ -50,6 +50,8 @@ SERVER_PORT
 JWT_SECRET
 JWT_EXPIRATION
 CORS_ALLOWED_ORIGINS
+SESSION_COOKIE_SECURE
+SESSION_COOKIE_SAME_SITE
 ADMIN_NAME
 ADMIN_EMAIL
 ADMIN_PASSWORD
@@ -63,11 +65,16 @@ tables must be recreated or migrated explicitly; the application does not drop
 or transform them automatically.
 
 `JWT_SECRET` is required to issue or validate tokens and must have at least 32
-characters. Production reads it exclusively from the environment. When all
+characters. Production reads it exclusively from the environment. Browser JWTs
+are transported only in the host-only `pm_session` HttpOnly cookie; JavaScript
+never receives the token. The cookie uses `SameSite=Lax`; production defaults to
+`Secure=true` and therefore requires HTTPS. The frontend and API must be
+same-site (for example, subdomains of the same HTTPS domain). When all
 three `ADMIN_*` values are set, startup creates one `ADMIN` user only if that
 email does not already exist; it never logs, replaces, or resets the password.
 JWT logout is stateless: `POST /api/auth/logout` returns `204 No Content` and
-the client must discard the access token.
+expires the session cookie. There is no refresh token or server-side JWT
+revocation list in this stage.
 
 ## Local Development
 
@@ -110,7 +117,8 @@ Then export the database and security variables in the terminal or configure
 them in your IDE run configuration. At minimum, use `DB_HOST=localhost` and
 the same `DB_*`, `JWT_*`, and `ADMIN_*` values used by Compose. `.env` is a
 Docker Compose file; Spring Boot does not load it automatically when launched
-directly.
+directly. Select `SPRING_PROFILES_ACTIVE=dev` explicitly; the application no
+longer defaults to the development profile when no profile is selected.
 
 Run the backend with the Maven Wrapper:
 
@@ -155,10 +163,11 @@ http://localhost:8080/v3/api-docs
 ```
 
 Swagger UI and OpenAPI JSON are disabled by default in the `prod` profile.
-To test protected operations, first call `POST /api/auth/login`, copy the
-returned `accessToken`, click **Authorize** in Swagger UI, and paste only the
-token—the UI adds the `Bearer` prefix automatically. The complete HTTP contract
-is also maintained in [API design](docs/api-design.md).
+In development, authenticate through `POST /api/auth/login`; the browser keeps
+the HttpOnly session cookie for same-origin Swagger requests. State-changing
+requests also require the `X-XSRF-TOKEN` header that mirrors the readable
+`XSRF-TOKEN` cookie. The complete HTTP contract is maintained in
+[API design](docs/api-design.md).
 
 ## Documentation
 

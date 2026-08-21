@@ -28,7 +28,7 @@ import jakarta.validation.constraints.Min;
 @Validated
 @RequestMapping("/api/dashboard")
 @Tag(name = "Dashboard", description = "Administrative dashboard metrics")
-@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+@SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
 public class DashboardController {
 
     private final DashboardService dashboardService;

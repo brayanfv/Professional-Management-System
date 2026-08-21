@@ -13,8 +13,5 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-  accessToken: string;
-  tokenType: "Bearer";
-  expiresIn: number;
   user: AuthenticatedUser;
 };

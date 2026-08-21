@@ -8,6 +8,7 @@ import com.brayanfavarin.professionalmanagement.dto.auth.AuthenticatedUserRespon
 import com.brayanfavarin.professionalmanagement.dto.auth.LoginRequest;
 import com.brayanfavarin.professionalmanagement.dto.auth.LoginResponse;
 import com.brayanfavarin.professionalmanagement.enums.UserRole;
+import com.brayanfavarin.professionalmanagement.security.AuthenticatedSession;
 
 class AuthenticationLoggingSafetyTests {
 
@@ -23,15 +24,19 @@ class AuthenticationLoggingSafetyTests {
     }
 
     @Test
-    void redactsAccessTokenFromLoginResponseStringRepresentation() {
+    void keepsJwtOutOfTheApiLoginResponseAndRedactsTheInternalSessionRepresentation() {
         String accessToken = "header.payload.signature-for-test";
         AuthenticatedUserResponse user = new AuthenticatedUserResponse(
                 1L, "Administrator", "admin@example.com", UserRole.ADMIN);
 
-        String representation = new LoginResponse(accessToken, "Bearer", 3600, user).toString();
+        String responseRepresentation = new LoginResponse(user).toString();
+        String sessionRepresentation = new AuthenticatedSession(accessToken, user).toString();
 
-        assertThat(representation)
-                .contains("accessToken=[REDACTED]", "admin@example.com")
+        assertThat(responseRepresentation)
+                .contains("admin@example.com")
+                .doesNotContain(accessToken, "accessToken");
+        assertThat(sessionRepresentation)
+                .contains("token=[REDACTED]", "admin@example.com")
                 .doesNotContain(accessToken);
     }
 }

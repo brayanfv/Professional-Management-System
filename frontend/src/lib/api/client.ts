@@ -1,6 +1,5 @@
 import type { ApiError } from "@/types/api-error";
 import { notifyUnauthorized } from "@/features/auth/auth-events";
-import { authStorage } from "@/features/auth/auth-storage";
 
 export type ApiRequestOptions = Omit<RequestInit, "body"> & {
   auth?: boolean;
@@ -23,6 +22,23 @@ function getApiBaseUrl() {
   }
 
   return apiUrl.replace(/\/$/, "");
+}
+
+function getCsrfToken() {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const cookie = document.cookie
+    .split(";")
+    .map((value) => value.trim())
+    .find((value) => value.startsWith("XSRF-TOKEN="));
+
+  return cookie ? decodeURIComponent(cookie.slice("XSRF-TOKEN=".length)) : null;
+}
+
+function isStateChangingMethod(method: string | undefined) {
+  return method !== undefined && !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 }
 
 function isApiError(value: unknown): value is ApiError {
@@ -69,9 +85,9 @@ export async function apiRequest<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const accessToken = auth ? authStorage.getAccessToken() : null;
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+  const csrfToken = isStateChangingMethod(requestOptions.method) ? getCsrfToken() : null;
+  if (csrfToken) {
+    headers.set("X-XSRF-TOKEN", csrfToken);
   }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -79,11 +95,11 @@ export async function apiRequest<T>(
     ...requestOptions,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
+    credentials: "include",
   });
   const responseBody = await readResponseBody(response);
 
   if (response.status === 401 && handleUnauthorized) {
-    authStorage.clearAccessToken();
     notifyUnauthorized();
   }
 

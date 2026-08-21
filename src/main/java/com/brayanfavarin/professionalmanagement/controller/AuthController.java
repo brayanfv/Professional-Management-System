@@ -1,13 +1,13 @@
 package com.brayanfavarin.professionalmanagement.controller;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.brayanfavarin.professionalmanagement.config.OpenApiConfig;
@@ -15,6 +15,8 @@ import com.brayanfavarin.professionalmanagement.dto.auth.AuthenticatedUserRespon
 import com.brayanfavarin.professionalmanagement.dto.auth.LoginRequest;
 import com.brayanfavarin.professionalmanagement.dto.auth.LoginResponse;
 import com.brayanfavarin.professionalmanagement.dto.common.ApiErrorResponse;
+import com.brayanfavarin.professionalmanagement.security.AuthenticatedSession;
+import com.brayanfavarin.professionalmanagement.security.SessionCookieService;
 import com.brayanfavarin.professionalmanagement.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,25 +34,30 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final AuthService authService;
+    private final SessionCookieService sessionCookieService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, SessionCookieService sessionCookieService) {
         this.authService = authService;
+        this.sessionCookieService = sessionCookieService;
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticate an administrator", description = "Public endpoint that returns a JWT access token.")
+    @Operation(summary = "Authenticate an administrator", description = "Creates an HttpOnly browser session cookie.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Authenticated"),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthenticatedSession session = authService.login(request);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, sessionCookieService.sessionCookie(session.token()).toString())
+                .body(new LoginResponse(session.user()));
     }
 
     @GetMapping("/me")
     @Operation(summary = "Get the authenticated user")
-    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    @SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Authenticated user"),
             @ApiResponse(responseCode = "401", description = "Authentication is required", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
@@ -61,14 +68,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Log out", description = "Stateless logout: the client must discard its JWT access token.")
-    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    @Operation(summary = "Log out", description = "Expires the browser session cookie.")
+    @SecurityRequirement(name = OpenApiConfig.SESSION_COOKIE_AUTH)
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Token discard acknowledged"),
             @ApiResponse(responseCode = "401", description = "Authentication is required", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public void logout() {
-        // Stateless JWT logout is performed by the client discarding its access token.
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, sessionCookieService.expiredSessionCookie().toString())
+                .build();
     }
 }
