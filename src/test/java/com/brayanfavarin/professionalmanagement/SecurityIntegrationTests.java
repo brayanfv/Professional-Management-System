@@ -139,6 +139,45 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void publishesAValidCsrfTokenAfterAuthenticationForSubsequentMutationsAndLogout() throws Exception {
+        MvcResult bootstrap = mvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+        Cookie initialCsrfCookie = csrfCookie(bootstrap);
+
+        MvcResult login = mvc.perform(loginRequest(initialCsrfCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        Cookie sessionCookie = sessionCookie(login);
+
+        MvcResult authenticatedUser = mvc.perform(get("/api/auth/me")
+                        .cookie(sessionCookie, initialCsrfCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        Cookie refreshedCsrfCookie = csrfCookie(authenticatedUser);
+
+        mvc.perform(post("/api/departments")
+                        .cookie(sessionCookie, refreshedCsrfCookie)
+                        .header("X-XSRF-TOKEN", refreshedCsrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"CSRF Integration Department\",\"description\":\"Created after authentication\"}"))
+                .andExpect(status().isCreated());
+
+        MvcResult logout = mvc.perform(post("/api/auth/logout")
+                        .cookie(sessionCookie, refreshedCsrfCookie)
+                        .header("X-XSRF-TOKEN", refreshedCsrfCookie.getValue()))
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        assertThat(logout.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(setCookie -> assertThat(setCookie)
+                        .contains(SESSION_COOKIE_NAME + "=", "Max-Age=0", "HttpOnly", "Path=/", "SameSite=Lax")
+                        .doesNotContain("Secure"));
+        mvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void logoutExpiresTheCookieAndDoesNotRequireAnExistingAuthentication() throws Exception {
         Cookie sessionCookie = sessionCookie(login());
 
@@ -197,6 +236,13 @@ class SecurityIntegrationTests {
                 .content("{\"email\":\"admin@example.com\",\"password\":\"password\"}");
     }
 
+    private static MockHttpServletRequestBuilder loginRequest(Cookie csrfCookie) {
+        return post("/api/auth/login")
+                .with(csrf(csrfCookie))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"admin@example.com\",\"password\":\"password\"}");
+    }
+
     private static Cookie sessionCookie(MvcResult login) {
         Cookie cookie = login.getResponse().getCookie(SESSION_COOKIE_NAME);
         assertThat(cookie).isNotNull();
@@ -204,8 +250,11 @@ class SecurityIntegrationTests {
     }
 
     private static RequestPostProcessor csrf() {
+        return csrf(new Cookie(CSRF_COOKIE_NAME, CSRF_TOKEN));
+    }
+
+    private static RequestPostProcessor csrf(Cookie csrfCookie) {
         return request -> {
-            Cookie csrfCookie = new Cookie(CSRF_COOKIE_NAME, CSRF_TOKEN);
             Cookie[] existingCookies = request.getCookies();
             if (existingCookies == null) {
                 request.setCookies(csrfCookie);
@@ -214,9 +263,19 @@ class SecurityIntegrationTests {
                 cookies[cookies.length - 1] = csrfCookie;
                 request.setCookies(cookies);
             }
-            request.addHeader("X-XSRF-TOKEN", CSRF_TOKEN);
+            request.addHeader("X-XSRF-TOKEN", csrfCookie.getValue());
             return request;
         };
+    }
+
+    private static Cookie csrfCookie(MvcResult result) {
+        String setCookie = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE).stream()
+                .filter(header -> header.startsWith(CSRF_COOKIE_NAME + "="))
+                .filter(header -> !header.contains("Max-Age=0"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Expected a current CSRF cookie"));
+        String token = setCookie.substring((CSRF_COOKIE_NAME + "=").length(), setCookie.indexOf(';'));
+        return new Cookie(CSRF_COOKIE_NAME, token);
     }
 
     private void createUser(String email, String password, boolean active) {

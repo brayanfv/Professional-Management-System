@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client"
+import { apiClient, type ApiReadOptions } from "@/lib/api/client"
 import type { PageResponse } from "@/types/pagination"
 import type {
   ProfessionalDetails,
@@ -9,7 +9,10 @@ import type {
   UpdateProfessionalStatusRequest,
 } from "@/types/professional"
 
-export function getProfessionals(params: ProfessionalsQueryParams) {
+export function getProfessionals(
+  params: ProfessionalsQueryParams,
+  options?: ApiReadOptions,
+) {
   const searchParams = new URLSearchParams({
     page: String(params.page),
     size: String(params.size),
@@ -31,11 +34,15 @@ export function getProfessionals(params: ProfessionalsQueryParams) {
 
   return apiClient.get<PageResponse<ProfessionalSummary>>(
     `/api/professionals?${searchParams.toString()}`,
+    options,
   )
 }
 
-export function getProfessionalById(id: number) {
-  return apiClient.get<ProfessionalDetails>(`/api/professionals/${id}`)
+export function getProfessionalById(id: number, options?: ApiReadOptions) {
+  return apiClient.get<ProfessionalDetails>(
+    `/api/professionals/${id}`,
+    options,
+  )
 }
 
 export function createProfessional(payload: CreateProfessionalRequest) {

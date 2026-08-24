@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client"
+import { apiClient, type ApiReadOptions } from "@/lib/api/client"
 import type {
   Contact,
   CreateContactRequest,
@@ -9,8 +9,11 @@ function contactsPath(professionalId: number) {
   return `/api/professionals/${professionalId}/contacts`
 }
 
-export function getProfessionalContacts(professionalId: number) {
-  return apiClient.get<Contact[]>(contactsPath(professionalId))
+export function getProfessionalContacts(
+  professionalId: number,
+  options?: ApiReadOptions,
+) {
+  return apiClient.get<Contact[]>(contactsPath(professionalId), options)
 }
 
 export function createProfessionalContact(

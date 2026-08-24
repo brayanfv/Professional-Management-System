@@ -8,6 +8,6 @@ import { getProfessionalContacts } from "@/lib/api/contacts"
 export function useProfessionalContacts(professionalId: number) {
   return useQuery({
     queryKey: professionalKeys.contacts(professionalId),
-    queryFn: () => getProfessionalContacts(professionalId),
+    queryFn: ({ signal }) => getProfessionalContacts(professionalId, { signal }),
   })
 }

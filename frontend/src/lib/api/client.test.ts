@@ -41,6 +41,18 @@ describe("apiClient", () => {
     expect(headers.get("Authorization")).toBeNull()
   })
 
+  it("forwards an AbortSignal to fetch", async () => {
+    const controller = new AbortController()
+    fetchMock.mockResolvedValueOnce(jsonResponse({ id: 1 }))
+
+    await apiClient.get<{ id: number }>("/api/professionals", {
+      signal: controller.signal,
+    })
+
+    const [, options] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(options.signal).toBe(controller.signal)
+  })
+
   it("serializes mutation data and mirrors the readable CSRF cookie", async () => {
     document.cookie = "XSRF-TOKEN=csrf%20value; path=/"
     fetchMock.mockResolvedValueOnce(jsonResponse({ id: 2 }, 201))

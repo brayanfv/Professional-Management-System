@@ -1,11 +1,14 @@
 import type { ApiError } from "@/types/api-error";
 import { notifyUnauthorized } from "@/features/auth/auth-events";
 
-export type ApiRequestOptions = Omit<RequestInit, "body"> & {
+export type ApiRequestOptions = Omit<RequestInit, "body" | "signal"> & {
   auth?: boolean;
   body?: unknown;
   handleUnauthorized?: boolean;
+  signal?: AbortSignal;
 };
+
+export type ApiReadOptions = Pick<ApiRequestOptions, "signal">;
 
 export class ApiClientError extends Error {
   constructor(public readonly details: ApiError) {

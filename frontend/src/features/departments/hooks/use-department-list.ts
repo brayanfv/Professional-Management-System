@@ -9,7 +9,7 @@ import type { DepartmentQueryParams } from "@/types/department"
 export function useDepartmentList(params: DepartmentQueryParams) {
   return useQuery({
     queryKey: departmentKeys.list(params),
-    queryFn: () => getDepartments(params),
+    queryFn: ({ signal }) => getDepartments(params, { signal }),
     placeholderData: keepPreviousData,
   })
 }

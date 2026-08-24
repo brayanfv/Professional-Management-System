@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client"
+import { apiClient, type ApiReadOptions } from "@/lib/api/client"
 import { getAllPaginatedOptions } from "@/lib/api/paginated-options"
 import type { PageResponse } from "@/types/pagination"
 import type {
@@ -17,16 +17,19 @@ function listPath(params: PositionQueryParams) {
   return `/api/positions?${searchParams.toString()}`
 }
 
-export function getPositions(params: PositionQueryParams) {
-  return apiClient.get<PageResponse<Position>>(listPath(params))
+export function getPositions(
+  params: PositionQueryParams,
+  options?: ApiReadOptions,
+) {
+  return apiClient.get<PageResponse<Position>>(listPath(params), options)
 }
 
-export function getPositionOptions() {
-  return getAllPaginatedOptions<Position>("/api/positions")
+export function getPositionOptions(options?: ApiReadOptions) {
+  return getAllPaginatedOptions<Position>("/api/positions", options)
 }
 
-export function getPositionById(id: number) {
-  return apiClient.get<Position>(`/api/positions/${id}`)
+export function getPositionById(id: number, options?: ApiReadOptions) {
+  return apiClient.get<Position>(`/api/positions/${id}`, options)
 }
 
 export function createPosition(payload: PositionRequest) {

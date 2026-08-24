@@ -9,14 +9,17 @@ import {
   UsersIcon,
   UserXIcon,
 } from "lucide-react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/common/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ChartCard } from "@/features/dashboard/components/chart-card"
 import { DashboardMetricCard } from "@/features/dashboard/components/dashboard-metric-card"
-import { DashboardMetricsSkeleton } from "@/features/dashboard/components/dashboard-skeletons"
-import { ProfessionalCountChart } from "@/features/dashboard/components/professional-count-chart"
+import {
+  ChartSkeleton,
+  DashboardMetricsSkeleton,
+} from "@/features/dashboard/components/dashboard-skeletons"
 import { RecentProfessionals } from "@/features/dashboard/components/recent-professionals"
 import {
   useDashboardSummary,
@@ -27,6 +30,17 @@ import {
 import { routes } from "@/lib/routes"
 
 const recentProfessionalsLimit = 5
+
+const ProfessionalCountChart = dynamic(
+  () =>
+    import("@/features/dashboard/components/professional-count-chart").then(
+      ({ ProfessionalCountChart: Chart }) => Chart,
+    ),
+  {
+    ssr: false,
+    loading: () => <ChartSkeleton />,
+  },
+)
 
 export function DashboardContent() {
   const summaryQuery = useDashboardSummary()

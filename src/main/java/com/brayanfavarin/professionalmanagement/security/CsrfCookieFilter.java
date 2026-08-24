@@ -2,7 +2,7 @@ package com.brayanfavarin.professionalmanagement.security;
 
 import java.io.IOException;
 
-import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -10,16 +10,23 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/** Forces Spring Security's deferred CSRF token into the browser-readable cookie. */
+/** Materializes Spring Security's deferred CSRF token for browser bootstrap responses. */
 public class CsrfCookieFilter extends OncePerRequestFilter {
+
+    private final CsrfTokenRepository csrfTokenRepository;
+
+    public CsrfCookieFilter(CsrfTokenRepository csrfTokenRepository) {
+        this.csrfTokenRepository = csrfTokenRepository;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        if (csrfToken != null) {
-            csrfToken.getToken();
-        }
+        materializeToken(request, response);
         filterChain.doFilter(request, response);
+    }
+
+    private void materializeToken(HttpServletRequest request, HttpServletResponse response) {
+        csrfTokenRepository.loadDeferredToken(request, response).get();
     }
 }

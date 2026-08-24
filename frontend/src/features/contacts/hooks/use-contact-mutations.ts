@@ -17,14 +17,9 @@ function useInvalidateProfessionalContacts(professionalId: number) {
   const queryClient = useQueryClient()
 
   return async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: professionalKeys.contacts(professionalId),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: professionalKeys.detail(professionalId),
-      }),
-    ])
+    await queryClient.invalidateQueries({
+      queryKey: professionalKeys.contacts(professionalId),
+    })
   }
 }
 

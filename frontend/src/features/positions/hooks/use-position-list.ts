@@ -9,7 +9,7 @@ import type { PositionQueryParams } from "@/types/position"
 export function usePositionList(params: PositionQueryParams) {
   return useQuery({
     queryKey: positionKeys.list(params),
-    queryFn: () => getPositions(params),
+    queryFn: ({ signal }) => getPositions(params, { signal }),
     placeholderData: keepPreviousData,
   })
 }

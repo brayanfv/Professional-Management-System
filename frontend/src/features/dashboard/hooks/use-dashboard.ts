@@ -13,27 +13,27 @@ import {
 export function useDashboardSummary() {
   return useQuery({
     queryKey: dashboardKeys.summary(),
-    queryFn: getDashboardSummary,
+    queryFn: ({ signal }) => getDashboardSummary({ signal }),
   })
 }
 
 export function useProfessionalsByDepartment() {
   return useQuery({
     queryKey: dashboardKeys.byDepartment(),
-    queryFn: getProfessionalsByDepartment,
+    queryFn: ({ signal }) => getProfessionalsByDepartment({ signal }),
   })
 }
 
 export function useProfessionalsByPosition() {
   return useQuery({
     queryKey: dashboardKeys.byPosition(),
-    queryFn: getProfessionalsByPosition,
+    queryFn: ({ signal }) => getProfessionalsByPosition({ signal }),
   })
 }
 
 export function useRecentProfessionals(limit: number) {
   return useQuery({
     queryKey: dashboardKeys.recent(limit),
-    queryFn: () => getRecentProfessionals(limit),
+    queryFn: ({ signal }) => getRecentProfessionals(limit, { signal }),
   })
 }

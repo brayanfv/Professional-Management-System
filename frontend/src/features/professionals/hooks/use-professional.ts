@@ -8,6 +8,6 @@ import { getProfessionalById } from "@/lib/api/professionals"
 export function useProfessional(id: number) {
   return useQuery({
     queryKey: professionalKeys.detail(id),
-    queryFn: () => getProfessionalById(id),
+    queryFn: ({ signal }) => getProfessionalById(id, { signal }),
   })
 }

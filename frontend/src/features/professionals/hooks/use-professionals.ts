@@ -9,7 +9,7 @@ import type { ProfessionalsQueryParams } from "@/types/professional"
 export function useProfessionals(params: ProfessionalsQueryParams) {
   return useQuery({
     queryKey: professionalKeys.list(params),
-    queryFn: () => getProfessionals(params),
+    queryFn: ({ signal }) => getProfessionals(params, { signal }),
     placeholderData: keepPreviousData,
   })
 }

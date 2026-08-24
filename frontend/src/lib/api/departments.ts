@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client"
+import { apiClient, type ApiReadOptions } from "@/lib/api/client"
 import { getAllPaginatedOptions } from "@/lib/api/paginated-options"
 import type {
   Department,
@@ -17,16 +17,19 @@ function listPath(params: DepartmentQueryParams) {
   return `/api/departments?${searchParams.toString()}`
 }
 
-export function getDepartments(params: DepartmentQueryParams) {
-  return apiClient.get<PageResponse<Department>>(listPath(params))
+export function getDepartments(
+  params: DepartmentQueryParams,
+  options?: ApiReadOptions,
+) {
+  return apiClient.get<PageResponse<Department>>(listPath(params), options)
 }
 
-export function getDepartmentOptions() {
-  return getAllPaginatedOptions<Department>("/api/departments")
+export function getDepartmentOptions(options?: ApiReadOptions) {
+  return getAllPaginatedOptions<Department>("/api/departments", options)
 }
 
-export function getDepartmentById(id: number) {
-  return apiClient.get<Department>(`/api/departments/${id}`)
+export function getDepartmentById(id: number, options?: ApiReadOptions) {
+  return apiClient.get<Department>(`/api/departments/${id}`, options)
 }
 
 export function createDepartment(payload: DepartmentRequest) {
