@@ -76,9 +76,12 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-It starts the production Next.js server on `http://127.0.0.1:3001` and uses the
-backend on `http://127.0.0.1:8081`. The Compose PostgreSQL data directory is a
-container tmpfs and is discarded when the environment is stopped:
+The Compose environment starts the production Next.js server on
+`http://127.0.0.1:3001` and the backend on `http://127.0.0.1:8081`. It waits
+for PostgreSQL and the frontend healthcheck before returning. The browser bundle
+is built with the host-reachable API URL, rather than the Docker-internal
+backend hostname. The Compose PostgreSQL data directory is a container tmpfs
+and is discarded when the environment is stopped:
 
 ```bash
 npm run e2e:env:down

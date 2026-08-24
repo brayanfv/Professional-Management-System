@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -50,10 +50,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm
@@ -88,15 +88,14 @@ jobs:
       run:
         working-directory: frontend
     env:
-      E2E_API_URL: http://127.0.0.1:8081
       E2E_BASE_URL: http://127.0.0.1:3001
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm
@@ -111,33 +110,42 @@ jobs:
       - name: Start isolated E2E environment
         run: npm run e2e:env:up
 
-      - name: Wait for the E2E backend
+      - name: Show E2E service status
+        run: docker compose -f ../docker-compose.e2e.yml ps
+
+      - name: Wait for E2E frontend and backend
         run: |
-          for attempt in $(seq 1 45); do
-            status="$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8081/api/auth/me || true)"
-            if [ "$status" = "401" ]; then
-              echo "E2E backend is ready."
+          for attempt in $(seq 1 30); do
+            backend_status="$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8081/api/auth/me || true)"
+            frontend_status="$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3001/login || true)"
+            if [ "$backend_status" = "401" ] && [ "$frontend_status" = "200" ]; then
+              echo "E2E backend and frontend are ready."
               exit 0
             fi
 
-            echo "Waiting for E2E backend (attempt $attempt/45; HTTP $status)..."
+            echo "Waiting for E2E services (attempt $attempt/30; backend HTTP $backend_status; frontend HTTP $frontend_status)..."
             sleep 2
           done
 
-          echo "E2E backend did not become ready in time."
+          echo "E2E services did not become ready in time."
+          docker compose -f ../docker-compose.e2e.yml ps
+          docker compose -f ../docker-compose.e2e.yml logs --no-color frontend
           docker compose -f ../docker-compose.e2e.yml logs --no-color
           exit 1
 
       - name: Run Playwright smoke tests
         run: npm run test:e2e
 
-      - name: Collect E2E service logs on failure
+      - name: Collect E2E diagnostics on failure
         if: failure()
-        run: docker compose -f ../docker-compose.e2e.yml logs --no-color
+        run: |
+          docker compose -f ../docker-compose.e2e.yml ps
+          docker compose -f ../docker-compose.e2e.yml logs --no-color frontend
+          docker compose -f ../docker-compose.e2e.yml logs --no-color
 
       - name: Upload Playwright artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-artifacts
           path: |

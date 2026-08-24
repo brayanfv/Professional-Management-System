@@ -39,3 +39,24 @@ services:
       ADMIN_PASSWORD: ${E2E_ADMIN_PASSWORD:-E2E-admin-only-ChangeMe1!}
     ports:
       - "127.0.0.1:8081:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.e2e
+      args:
+        NEXT_PUBLIC_API_URL: http://127.0.0.1:8081
+    environment:
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:3001:3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/login').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
