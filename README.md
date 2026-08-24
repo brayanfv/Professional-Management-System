@@ -126,11 +126,44 @@ Run the backend with the Maven Wrapper:
 .\mvnw.cmd spring-boot:run
 ```
 
-Tests remain outside Docker and use H2:
+Tests run outside Docker. The fast suite uses H2 where appropriate, while the
+database integration suite starts an isolated PostgreSQL 16 Testcontainer and
+runs the real Flyway migrations:
 
 ```powershell
 .\mvnw.cmd clean test
 ```
+
+## Continuous Integration
+
+GitHub Actions runs the quality pipeline for every pull request and every push
+to `main`. It has independent Backend, Frontend, and E2E jobs followed by a
+single Quality Gate. The backend job runs the H2 and PostgreSQL Testcontainers
+suites; the frontend job runs lint, type-checking, Vitest, a production build,
+and `npm audit --audit-level=high`; the E2E job uses the disposable
+`docker-compose.e2e.yml` environment and Playwright Chromium smoke test.
+
+The local equivalents are:
+
+```powershell
+.\mvnw.cmd clean test
+.\mvnw.cmd clean package
+
+cd frontend
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm audit --audit-level=high
+npm run e2e:env:up
+npx playwright install chromium
+npm run test:e2e
+npm run e2e:env:down
+```
+
+Both the backend integration tests and the E2E stack require Docker Desktop.
+The E2E Compose file uses only isolated, test-only credentials and a temporary
+PostgreSQL data directory; it never targets the local development database.
 
 ## Current API
 
