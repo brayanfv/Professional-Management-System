@@ -197,6 +197,12 @@ an external TLS/reverse-proxy decision, private PostgreSQL connectivity,
 backups with a tested restore procedure, and a health/readiness strategy before
 public go-live.
 
+The provider-neutral [production operations runbook](docs/production-operations.md)
+defines the initial backup/restore policy, proposed same-origin deployment
+topology, health-probe use, runtime configuration boundary, and trusted-proxy
+requirements. It is planning documentation, not a production deployment
+manifest.
+
 The backend exposes only unauthenticated operational probes:
 `/actuator/health`, `/actuator/health/liveness`, and
 `/actuator/health/readiness`. Health details are never exposed through HTTP.
@@ -251,6 +257,7 @@ Project documentation is maintained in [docs](docs/):
 - [Architecture](docs/architecture.md)
 - [Database design](docs/database.md)
 - [API design](docs/api-design.md)
+- [Production operations](docs/production-operations.md)
 - [Legacy API requests](docs/api.http)
 
 ## Planned roadmap
