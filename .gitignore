@@ -5,6 +5,10 @@ target/
 .env.local
 .env.*.local
 !.env.example
+.env.production
+backups/
+*.dump
+*.dump.sha256
 .DS_Store
 Thumbs.db
 !.mvn/wrapper/maven-wrapper.jar

@@ -51,7 +51,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService,
             SessionCookieService sessionCookieService, CsrfTokenRepository csrfTokenRepository,
-            LoginRateLimiter loginRateLimiter, ObjectMapper objectMapper) throws Exception {
+            LoginRateLimiter loginRateLimiter, ClientIpResolver clientIpResolver, ObjectMapper objectMapper) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler();
         csrfTokenRequestHandler.setCsrfRequestAttributeName(null);
 
@@ -74,7 +74,8 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService, authenticationEntryPoint,
                         sessionCookieService),
                         UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new LoginRateLimitFilter(loginRateLimiter, objectMapper), JwtAuthenticationFilter.class)
+                .addFilterBefore(new LoginRateLimitFilter(loginRateLimiter, clientIpResolver, objectMapper),
+                        JwtAuthenticationFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(csrfTokenRepository), CsrfFilter.class)
                 .build();
     }

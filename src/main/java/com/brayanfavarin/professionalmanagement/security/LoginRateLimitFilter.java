@@ -26,10 +26,12 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     private static final String LOGIN_PATH = "/api/auth/login";
 
     private final LoginRateLimiter limiter;
+    private final ClientIpResolver clientIpResolver;
     private final ObjectMapper objectMapper;
 
-    public LoginRateLimitFilter(LoginRateLimiter limiter, ObjectMapper objectMapper) {
+    public LoginRateLimitFilter(LoginRateLimiter limiter, ClientIpResolver clientIpResolver, ObjectMapper objectMapper) {
         this.limiter = limiter;
+        this.clientIpResolver = clientIpResolver;
         this.objectMapper = objectMapper;
     }
 
@@ -41,7 +43,7 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        LoginRateLimiter.LoginRateLimitResult result = limiter.tryConsume(directClientAddress(request));
+        LoginRateLimiter.LoginRateLimitResult result = limiter.tryConsume(clientIpResolver.resolve(request));
         if (result.allowed()) {
             filterChain.doFilter(request, response);
             return;
@@ -64,10 +66,5 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
                 "Too many sign-in attempts. Try again later.",
                 request.getRequestURI(),
                 null));
-    }
-
-    private String directClientAddress(HttpServletRequest request) {
-        String remoteAddress = request.getRemoteAddr();
-        return remoteAddress == null || remoteAddress.isBlank() ? "unknown" : remoteAddress;
     }
 }

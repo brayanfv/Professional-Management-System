@@ -128,9 +128,10 @@ capable but needs separate certificate automation; Traefik adds discovery
 features that this small topology does not need. A managed-platform ingress is a
 good future option if it can keep `/` and `/api/*` on one host.
 
-This recommendation does not create or configure a VPS, domain, certificate, or
-production Compose stack. It is the target for the next topology implementation
-step.
+The repository now provides `docker-compose.prod.yml`,
+`infra/caddy/Caddyfile`, and `.env.production.example` as a reproducible
+topology. They do not create or configure a VPS, domain, DNS record, public
+certificate, or production secrets.
 
 ## Final traffic flow, TLS, and public services
 
@@ -186,22 +187,59 @@ not Git, image layers, build logs, or `NEXT_PUBLIC_*` variables, for secrets.
 
 ## Trusted proxy and rate limiting
 
-Today the limiter keys on `request.getRemoteAddr()`. Behind Caddy, Spring Boot
-would see the proxy/container-network address, so all public clients would share
-one bucket. Do not trust arbitrary `X-Forwarded-For` headers.
+The production Compose topology assigns Caddy the fixed private application
+network address `172.30.0.2`. The backend accepts `X-Forwarded-For` only when
+the immediate peer is that configured address; direct callers, malformed values,
+and multiple forwarded addresses retain their direct remote address. Tests cover
+both untrusted-header spoofing and trusted-proxy resolution.
 
-At deployment time, the backend must be reachable only from the trusted proxy.
-The proxy must discard client-supplied forwarded headers and set authoritative
-`Forwarded`/`X-Forwarded-For`, `X-Forwarded-Proto`, and `X-Forwarded-Host`
-headers itself. A subsequent deployment-specific backend change must accept a
-forwarded client IP only when the direct peer is in an explicitly configured
-trusted-proxy network. `server.forward-headers-strategy=framework` can support
-trusted scheme/host forwarding, but does not itself make the current limiter
-safely consume `X-Forwarded-For`.
+Caddy's standard `reverse_proxy` behavior ignores client-supplied forwarded
+values when Caddy is the edge proxy, then sets `X-Forwarded-For`,
+`X-Forwarded-Proto`, and `X-Forwarded-Host` for the upstream. No manual header
+override is needed in the Caddyfile. The backend is private to the Docker
+network, so an Internet caller cannot impersonate the Caddy peer.
 
-Keep direct-address behavior until that proxy policy and its tests exist. For
-multiple backend instances, replace the in-memory bucket store with a shared
-limiter.
+Do not add another proxy, CDN, or load balancer in front of Caddy without
+configuring Caddy's trusted proxy ranges first. Likewise, do not enable generic
+Spring forwarded-header processing as a substitute for the limiter's explicit
+trusted-peer policy. Multiple backend instances still require a shared limiter.
+
+## Repository production assets and local simulation
+
+Copy `.env.production.example` to the ignored `.env.production` file only on a
+controlled host, restrict it to its owner (for example `chmod 600` on Linux),
+and use it explicitly:
+
+```text
+docker compose --env-file .env.production -f docker-compose.prod.yml config
+docker compose --env-file .env.production -f docker-compose.prod.yml up --build --detach
+docker compose --env-file .env.production -f docker-compose.prod.yml down
+```
+
+After startup, inspect service health with `docker compose --env-file
+.env.production -f docker-compose.prod.yml ps`. The backend readiness probe is
+private to the container network and can be checked without publishing port
+8080:
+
+```text
+docker compose --env-file .env.production -f docker-compose.prod.yml exec backend \
+  curl --fail http://127.0.0.1:8080/actuator/health/readiness
+```
+
+For a local topology check, the example uses `PUBLIC_HOST=localhost` and
+`NEXT_PUBLIC_API_URL=https://localhost`. Caddy will use its local/internal TLS
+for `localhost`; no public certificate is requested. Use a client that accepts
+the local certificate only for this dedicated simulation (for example `curl -k`)
+and keep the existing E2E environment unchanged. Validate `/login` through
+Caddy, `/api/auth/me` returns `401` through Caddy without a session, and the
+backend readiness endpoint is consumed only from the private container network.
+
+`scripts/backup-postgres.sh` produces a PostgreSQL custom-format dump and a
+SHA-256 checksum from externally supplied libpq environment variables. It does
+not upload the archive: an encrypted off-host transfer and scheduler are still
+required. `scripts/restore-postgres.sh` requires an explicit target confirmation
+and a matching checksum before it runs `pg_restore`; use it first only against
+an isolated target. Neither script performs retention deletion.
 
 ## CI/CD implications
 

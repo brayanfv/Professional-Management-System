@@ -15,7 +15,11 @@ FROM eclipse-temurin:21-jre-jammy AS runtime
 
 WORKDIR /app
 
-RUN groupadd --system spring && useradd --system --gid spring --home-dir /app spring
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system spring \
+    && useradd --system --gid spring --home-dir /app spring
 
 COPY --from=build /workspace/target/*.jar app.jar
 

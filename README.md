@@ -182,10 +182,11 @@ PostgreSQL data directory; it never targets the local development database.
 
 ## Production configuration boundary
 
-The repository does not yet contain a production Compose stack or deployment
-manifest. `compose.yml` is for local development and
-`docker-compose.e2e.yml` is disposable test infrastructure; neither should be
-used as production infrastructure.
+`compose.yml` is for local development and `docker-compose.e2e.yml` is
+disposable test infrastructure; neither is production infrastructure.
+`docker-compose.prod.yml`, `infra/caddy/Caddyfile`, and
+`.env.production.example` define the repository's reproducible production
+topology. They do not provision a VPS, domain, DNS, certificates, or secrets.
 
 A production start must set `SPRING_PROFILES_ACTIVE=prod`, provide `DB_HOST`,
 `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and an
@@ -198,10 +199,10 @@ backups with a tested restore procedure, and a health/readiness strategy before
 public go-live.
 
 The provider-neutral [production operations runbook](docs/production-operations.md)
-defines the initial backup/restore policy, proposed same-origin deployment
-topology, health-probe use, runtime configuration boundary, and trusted-proxy
-requirements. It is planning documentation, not a production deployment
-manifest.
+defines the initial backup/restore policy, same-origin deployment topology,
+health-probe use, runtime configuration boundary, and trusted-proxy behavior.
+It also explains how to validate the production Compose stack locally without
+turning it into a real deployment.
 
 The backend exposes only unauthenticated operational probes:
 `/actuator/health`, `/actuator/health/liveness`, and
