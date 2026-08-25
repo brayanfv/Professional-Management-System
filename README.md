@@ -50,6 +50,9 @@ SERVER_PORT
 JWT_SECRET
 JWT_EXPIRATION
 CORS_ALLOWED_ORIGINS
+LOGIN_RATE_LIMIT_CAPACITY
+LOGIN_RATE_LIMIT_REFILL_TOKENS
+LOGIN_RATE_LIMIT_REFILL_PERIOD
 SESSION_COOKIE_SECURE
 SESSION_COOKIE_SAME_SITE
 ADMIN_NAME
@@ -68,13 +71,25 @@ or transform them automatically.
 characters. Production reads it exclusively from the environment. Browser JWTs
 are transported only in the host-only `pm_session` HttpOnly cookie; JavaScript
 never receives the token. The cookie uses `SameSite=Lax`; production defaults to
-`Secure=true` and therefore requires HTTPS. The frontend and API must be
-same-site (for example, subdomains of the same HTTPS domain). When all
-three `ADMIN_*` values are set, startup creates one `ADMIN` user only if that
-email does not already exist; it never logs, replaces, or resets the password.
+`Secure=true` and therefore requires HTTPS. In the current browser architecture,
+the frontend must access the API through the same public host (normally by
+proxying `/api`) because the host-only `XSRF-TOKEN` cookie is read by frontend
+JavaScript. Separate frontend/API subdomains require an explicit CSRF
+cookie-domain design and are not supported by the current configuration. When
+all three `ADMIN_*` values are set, startup creates one `ADMIN` user only if
+that email does not already exist; it never logs, replaces, or resets the
+password.
 JWT logout is stateless: `POST /api/auth/logout` returns `204 No Content` and
 expires the session cookie. There is no refresh token or server-side JWT
 revocation list in this stage.
+
+`POST /api/auth/login` is protected by an in-memory, per-direct-client-IP token
+bucket. Its default is 10 attempts per minute; valid and invalid attempts both
+consume a token. Configure `LOGIN_RATE_LIMIT_CAPACITY`,
+`LOGIN_RATE_LIMIT_REFILL_TOKENS`, and `LOGIN_RATE_LIMIT_REFILL_PERIOD` for the
+deployment. This limiter is intentionally appropriate only for one application
+instance and does not trust `X-Forwarded-For` before a trusted proxy topology is
+configured. A horizontally scaled deployment needs a shared/distributed limiter.
 
 ## Local Development
 
@@ -164,6 +179,30 @@ npm run e2e:env:down
 Both the backend integration tests and the E2E stack require Docker Desktop.
 The E2E Compose file uses only isolated, test-only credentials and a temporary
 PostgreSQL data directory; it never targets the local development database.
+
+## Production configuration boundary
+
+The repository does not yet contain a production Compose stack or deployment
+manifest. `compose.yml` is for local development and
+`docker-compose.e2e.yml` is disposable test infrastructure; neither should be
+used as production infrastructure.
+
+A production start must set `SPRING_PROFILES_ACTIVE=prod`, provide `DB_HOST`,
+`DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and an
+explicit HTTPS `CORS_ALLOWED_ORIGINS`, and build the frontend with the public
+same-origin `NEXT_PUBLIC_API_URL`. `JWT_SECRET` must contain at least 32
+characters. The initial deployment must also provide all three `ADMIN_*`
+values unless an administrator already exists. Production additionally needs
+an external TLS/reverse-proxy decision, private PostgreSQL connectivity,
+backups with a tested restore procedure, and a health/readiness strategy before
+public go-live.
+
+The backend exposes only unauthenticated operational probes:
+`/actuator/health`, `/actuator/health/liveness`, and
+`/actuator/health/readiness`. Health details are never exposed through HTTP.
+Use the readiness endpoint for traffic admission and the liveness endpoint for
+process restart decisions. The runtime image intentionally does not install a
+healthcheck client; the future orchestrator or ingress should probe these URLs.
 
 ## Current API
 

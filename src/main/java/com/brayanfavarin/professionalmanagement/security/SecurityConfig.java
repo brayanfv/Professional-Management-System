@@ -3,6 +3,8 @@ package com.brayanfavarin.professionalmanagement.security;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +50,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService,
-            SessionCookieService sessionCookieService, CsrfTokenRepository csrfTokenRepository) throws Exception {
+            SessionCookieService sessionCookieService, CsrfTokenRepository csrfTokenRepository,
+            LoginRateLimiter loginRateLimiter, ObjectMapper objectMapper) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestHandler = new CsrfTokenRequestAttributeHandler();
         csrfTokenRequestHandler.setCsrfRequestAttributeName(null);
 
@@ -63,12 +66,15 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").denyAll()
                         .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService, authenticationEntryPoint,
                         sessionCookieService),
                         UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new LoginRateLimitFilter(loginRateLimiter, objectMapper), JwtAuthenticationFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(csrfTokenRepository), CsrfFilter.class)
                 .build();
     }

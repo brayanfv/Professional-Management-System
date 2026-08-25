@@ -216,6 +216,22 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void exposesOnlyUnauthenticatedHealthProbesWithoutInternalDetails() throws Exception {
+        mvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.components").doesNotExist());
+        mvc.perform(get("/actuator/health/liveness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+        mvc.perform(get("/actuator/health/readiness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+        mvc.perform(get("/actuator/env"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @WithMockUser(roles = "VIEWER")
     void returnsStandardForbiddenResponseForInsufficientRole() throws Exception {
         mvc.perform(get("/api/professionals"))
