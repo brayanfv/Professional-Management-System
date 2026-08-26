@@ -3,6 +3,7 @@ package com.brayanfavarin.professionalmanagement.security;
 import java.io.IOException;
 
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -17,6 +18,13 @@ public class CsrfCookieFilter extends OncePerRequestFilter {
 
     public CsrfCookieFilter(CsrfTokenRepository csrfTokenRepository) {
         this.csrfTokenRepository = csrfTokenRepository;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // A CORS preflight must not rotate the double-submit cookie between the
+        // browser preparing the mutation header and the actual POST/PUT/etc.
+        return CorsUtils.isPreFlightRequest(request);
     }
 
     @Override

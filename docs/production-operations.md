@@ -21,6 +21,52 @@ Only the reverse proxy accepts Internet traffic. PostgreSQL must never publish
 port 5432 publicly. The Next.js and Spring Boot ports must also be private to
 the VPS/container network.
 
+The production Compose topology reserves `172.30.0.10` for Caddy on its
+private application network. Spring trusts forwarded client-address headers
+only when the direct peer is that proxy address; do not add arbitrary client
+addresses to the trusted-proxy list.
+
+## Local production-like smoke
+
+For an isolated local drill, copy `.env.production.example` to the ignored
+`.env.production` and use test-only values. If host ports 80 or 443 are in
+use locally, set `CADDY_HTTP_PORT` and `CADDY_HTTPS_PORT` in that ignored file;
+they default to 80 and 443 for the VPS. Caddy issues an internal local
+certificate for `localhost`, so curl uses `-k` and the dedicated production
+smoke uses Playwright's `ignoreHTTPSErrors` only for this local CA.
+
+After the Compose stack is healthy, run the restored-data browser smoke from
+`frontend` with `npm run test:e2e:prod-smoke`. It targets
+`https://localhost:8443` by default; override `PROD_SMOKE_BASE_URL` and the
+test-only administrator variables only when the local drill environment uses
+different values. This smoke is complementary to, and does not replace, the
+ordinary E2E suite.
+
+### Validated local drill (2026-08-25)
+
+An isolated drill used the production Compose topology with `PUBLIC_HOST` set
+to `localhost`, Caddy internal TLS, a test-only administrator, and local port
+overrides `8088`/`8443` because the host's 80/443 bindings were unavailable.
+Those overrides are not part of the VPS deployment contract.
+
+The drill created a Department, Position, and Professional through the Caddy
+HTTPS origin; verified that a mutation without CSRF was rejected; created a
+custom-format `pg_dump`; verified its SHA-256 checksum and `pg_restore --list`;
+then removed only the isolated named Compose volumes. A fresh database started
+with seven Flyway migrations and no drill records. The verified archive was
+restored with the explicit target confirmation, after which Flyway validated
+the restored history at version 7, Hibernate initialized with schema
+validation, readiness returned `UP`, and the browser smoke loaded the restored
+professional details and signed out.
+
+Observed local baseline: backup creation was approximately 7 seconds including
+the one-off PostgreSQL client container; restore was 1.08 seconds; a backend
+restart returned healthy in approximately 17 seconds. These are small local
+drill measurements, not production capacity guarantees. The dump stayed in
+the ignored `backups/` directory outside `postgres_prod_data`; the named volume
+is persistence, not a backup. Off-host encrypted backup transfer, scheduling,
+and retention enforcement remain required before a public deployment.
+
 ## Backup strategy
 
 ### What is backed up

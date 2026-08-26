@@ -34,7 +34,7 @@ if [[ "$RESTORE_CONFIRMATION" != "$expected_confirmation" ]]; then
   exit 1
 fi
 
-sha256sum --check "$checksum_file"
+sha256sum -c "$checksum_file"
 
 pg_restore \
   --clean \

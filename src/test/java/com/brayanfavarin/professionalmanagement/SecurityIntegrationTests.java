@@ -209,6 +209,16 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void corsPreflightDoesNotRotateTheCsrfCookie() throws Exception {
+        mvc.perform(options("/api/auth/logout")
+                        .header(HttpHeaders.ORIGIN, "http://localhost:3000")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                        .cookie(new Cookie(CSRF_COOKIE_NAME, CSRF_TOKEN)))
+                .andExpect(status().isOk())
+                .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE));
+    }
+
+    @Test
     void protectsAdministrativeEndpointsAndUsesStandardUnauthorizedResponse() throws Exception {
         mvc.perform(get("/api/professionals"))
                 .andExpect(status().isUnauthorized())
