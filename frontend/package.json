@@ -11,6 +11,7 @@
     "test": "vitest run --configLoader runner",
     "test:watch": "vitest --configLoader runner",
     "test:e2e": "playwright test",
+    "test:e2e:prod-smoke": "playwright test --config playwright.prod.config.ts",
     "e2e:env:up": "docker compose -f ../docker-compose.e2e.yml up --build --detach --wait --wait-timeout 120",
     "e2e:env:down": "docker compose -f ../docker-compose.e2e.yml down --volumes"
   },
